@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated QR codes
+qr_codes/
+
+# Biometric data
+face_data/
+fingerprint_data/
+
+# VS Code
+.vscode/
+
+# Old files
+_old_files/
+
+# Environment / secrets
+.env
