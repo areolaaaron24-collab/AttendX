@@ -20,6 +20,7 @@ from face_system import (
 
 # ============================================================
 # ATTENDX FACE REGISTRATION
+# STUDENT FACE REGISTRATION
 # SMOOTH + CLEAR VERSION
 # ============================================================
 
@@ -39,32 +40,22 @@ FACE_FOLDER = os.path.join(
 
 CAMERA_INDEX = 0
 
-# Keep the actual camera image clear.
 CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480
 
-# Do not reduce detection too much.
-# Detection is done on a smaller copy,
-# but the original camera frame stays clear.
 MIN_DETECTION_WIDTH = 320
 NORMAL_DETECTION_WIDTH = 400
 MAX_DETECTION_WIDTH = 480
 
-# Face detection interval.
-# Lower number = more frequent detection.
 NORMAL_DETECTION_INTERVAL = 2
 LOW_DETECTION_INTERVAL = 3
 HIGH_DETECTION_INTERVAL = 2
 
-# Minimum face size for registration.
 MIN_FACE_WIDTH = 90
 MIN_FACE_HEIGHT = 90
 
-# Duplicate registration threshold.
 DUPLICATE_TOLERANCE = 0.45
 
-# Face encoding uses one jitter for reasonable quality
-# without making registration unnecessarily slow.
 ENCODING_JITTERS = 1
 
 
@@ -604,7 +595,6 @@ def create_camera():
 
     # --------------------------------------------------------
     # Reduce camera buffering when supported.
-    # This helps reduce delayed frames.
     # --------------------------------------------------------
 
     try:
@@ -619,7 +609,6 @@ def create_camera():
 
     # --------------------------------------------------------
     # Try 30 FPS.
-    # Camera decides actual supported FPS.
     # --------------------------------------------------------
 
     try:
@@ -871,7 +860,6 @@ def draw_face_box(
             thickness
         )
 
-        # Corner accents
         corner = 16
 
         cv2.line(
@@ -1876,7 +1864,7 @@ def register_student_face(
             if do_register:
 
                 # --------------------------------------------
-                # Must have exactly one face.
+                # Must have exactly one detected face.
                 # --------------------------------------------
 
                 if len(last_detection) != 1:
@@ -1889,13 +1877,39 @@ def register_student_face(
                     continue
 
                 # --------------------------------------------
-                # Validate current face position.
+                # IMPORTANT FIX
+                #
+                # Do NOT call face_locations() again here.
+                #
+                # The previous version performed a second HOG
+                # detection on the original frame. That could
+                # produce:
+                #
+                # FACE READY
+                #       ↓
+                # REGISTER FACE
+                #       ↓
+                # FACE NOT FOUND
+                #
+                # We now use the face that was already detected.
+                # --------------------------------------------
+
+                capture_frame = (
+                    frame.copy()
+                )
+
+                capture_location = (
+                    last_detection[0]
+                )
+
+                # --------------------------------------------
+                # Validate the already detected face.
                 # --------------------------------------------
 
                 current_validation = (
                     validate_face_position(
-                        frame,
-                        last_detection[0]
+                        capture_frame,
+                        capture_location
                     )
                 )
 
@@ -1909,24 +1923,59 @@ def register_student_face(
                     continue
 
                 # --------------------------------------------
-                # Use the ORIGINAL clear camera frame.
-                #
-                # Important:
-                # We do NOT use the resized detection image.
-                # This keeps registration quality better.
+                # Make sure the detected face coordinates
+                # are inside the original frame.
                 # --------------------------------------------
 
-                capture_frame = (
-                    frame.copy()
+                frame_height, frame_width = (
+                    capture_frame.shape[:2]
                 )
 
-                set_status(
-                    "CAPTURING FACE...",
-                    "normal"
+                top, right, bottom, left = (
+                    capture_location
+                )
+
+                top = max(
+                    0,
+                    min(
+                        top,
+                        frame_height - 1
+                    )
+                )
+
+                right = max(
+                    1,
+                    min(
+                        right,
+                        frame_width
+                    )
+                )
+
+                bottom = max(
+                    1,
+                    min(
+                        bottom,
+                        frame_height
+                    )
+                )
+
+                left = max(
+                    0,
+                    min(
+                        left,
+                        frame_width - 1
+                    )
+                )
+
+                capture_location = (
+                    top,
+                    right,
+                    bottom,
+                    left
                 )
 
                 # --------------------------------------------
-                # Force one fresh detection on original frame.
+                # Make RGB version of the ORIGINAL clear frame.
                 # --------------------------------------------
 
                 try:
@@ -1936,17 +1985,10 @@ def register_student_face(
                         cv2.COLOR_BGR2RGB
                     )
 
-                    capture_locations = (
-                        face_recognition.face_locations(
-                            capture_rgb,
-                            model="hog"
-                        )
-                    )
-
                 except Exception as error:
 
                     print(
-                        "Capture detection error:",
+                        "Capture conversion error:",
                         error
                     )
 
@@ -1957,53 +1999,17 @@ def register_student_face(
 
                     continue
 
-                # --------------------------------------------
-                # Exactly one face
-                # --------------------------------------------
-
-                if len(capture_locations) != 1:
-
-                    if len(capture_locations) > 1:
-
-                        set_status(
-                            "ONLY ONE FACE ALLOWED",
-                            "error"
-                        )
-
-                    else:
-
-                        set_status(
-                            "FACE NOT FOUND - TRY AGAIN",
-                            "error"
-                        )
-
-                    continue
-
-                capture_location = (
-                    capture_locations[0]
+                set_status(
+                    "CAPTURING FACE...",
+                    "normal"
                 )
-
-                capture_validation = (
-                    validate_face_position(
-                        capture_frame,
-                        capture_location
-                    )
-                )
-
-                if not capture_validation["valid"]:
-
-                    set_status(
-                        capture_validation["reason"],
-                        "warning"
-                    )
-
-                    continue
 
                 # --------------------------------------------
                 # FACE ENCODING
                 #
-                # This is the expensive part.
-                # It happens ONLY after clicking register.
+                # We use the already detected face location.
+                #
+                # No second face_locations() call.
                 # --------------------------------------------
 
                 try:
@@ -2277,7 +2283,6 @@ def register_student_face(
 
             # ------------------------------------------------
             # Keep UI responsive.
-            # No sleep here.
             # ------------------------------------------------
 
             cv2.waitKey(1)
