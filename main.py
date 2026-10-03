@@ -61,7 +61,7 @@ def get_connection():
     return connection
 
 
-def create_database():
+def _base_create_database():
     os.makedirs(QR_FOLDER, exist_ok=True)
 
     connection = get_connection()
@@ -729,132 +729,6 @@ def show_user_guide(app):
 # ROLE SELECTION
 # ============================================================
 
-def role_selection(app):
-    global CURRENT_USER_NAME, CURRENT_USER_ROLE
-    CURRENT_USER_NAME = ""
-    CURRENT_USER_ROLE = ""
-    clear_screen(app)
-
-    create_top_bar(app, app)
-
-    center = ctk.CTkFrame(app, fg_color="transparent")
-    center.pack(expand=True, fill="both")
-
-    ctk.CTkLabel(
-        center,
-        text="WELCOME TO ATTENDX",
-        font=("Arial", 34, "bold"),
-        text_color=WHITE
-    ).pack(pady=(40, 5))
-
-    ctk.CTkLabel(
-        center,
-        text="Smart School Attendance Management System",
-        font=("Arial", 14),
-        text_color=MUTED
-    ).pack(pady=(0, 30))
-
-    cards = ctk.CTkFrame(center, fg_color="transparent")
-    cards.pack()
-
-    # STUDENT CARD
-    student_card = ctk.CTkFrame(
-        cards,
-        width=360,
-        height=300,
-        corner_radius=18,
-        fg_color=CARD,
-        border_width=1,
-        border_color=BORDER
-    )
-    student_card.pack(side="left", padx=15)
-    student_card.pack_propagate(False)
-
-    ctk.CTkLabel(
-        student_card,
-        text="STUDENT",
-        font=("Arial", 25, "bold"),
-        text_color=WHITE
-    ).pack(pady=(35, 10))
-
-    ctk.CTkLabel(
-        student_card,
-        text="Manage your subjects,\nprofile and attendance.",
-        font=("Arial", 12),
-        text_color=TEXT,
-        justify="center"
-    ).pack(pady=5)
-
-    create_button(
-        student_card,
-        "ENTER STUDENT PORTAL",
-        lambda: student_portal(app),
-        width=240
-    ).pack(pady=30)
-
-    # TEACHER CARD
-    teacher_card = ctk.CTkFrame(
-        cards,
-        width=360,
-        height=300,
-        corner_radius=18,
-        fg_color=CARD,
-        border_width=1,
-        border_color=BORDER
-    )
-    teacher_card.pack(side="left", padx=15)
-    teacher_card.pack_propagate(False)
-
-    ctk.CTkLabel(
-        teacher_card,
-        text="TEACHER",
-        font=("Arial", 25, "bold"),
-        text_color=WHITE
-    ).pack(pady=(35, 10))
-
-    ctk.CTkLabel(
-        teacher_card,
-        text="Manage schedules,\nstudents and attendance.",
-        font=("Arial", 12),
-        text_color=TEXT,
-        justify="center"
-    ).pack(pady=5)
-
-    create_button(
-        teacher_card,
-        "ENTER TEACHER PORTAL",
-        lambda: teacher_portal(app),
-        width=240
-    ).pack(pady=30)
-
-    guide_row = ctk.CTkFrame(center, fg_color="transparent")
-    guide_row.pack(pady=24)
-
-    create_button(
-        guide_row,
-        "USER GUIDE",
-        lambda: show_user_guide(app),
-        width=170,
-        height=38,
-        fg_color=CARD,
-        hover_color=CARD_2
-    ).pack(side="left", padx=6)
-
-    create_button(
-        guide_row,
-        "EXIT SYSTEM",
-        app.destroy,
-        width=170,
-        height=38,
-        fg_color="#242B40",
-        hover_color="#323B55"
-    ).pack(side="left", padx=6)
-
-
-# ============================================================
-# STUDENT PORTAL
-# ============================================================
-
 def student_portal(app):
     clear_screen(app)
     create_top_bar(
@@ -913,152 +787,6 @@ def student_portal(app):
 
 # ============================================================
 # STUDENT REGISTER
-# ============================================================
-
-def student_register_page(app):
-    clear_screen(app)
-
-    create_top_bar(
-        app,
-        app,
-        True,
-        lambda: student_portal(app)
-    )
-
-    create_page_title(
-        app,
-        "CREATE STUDENT ACCOUNT",
-        "Enter your official student information."
-    )
-
-    outer = ctk.CTkFrame(app, fg_color="transparent")
-    outer.pack(expand=True)
-
-    form = ctk.CTkFrame(
-        outer,
-        width=520,
-        fg_color=CARD,
-        corner_radius=18,
-        border_width=1,
-        border_color=BORDER
-    )
-    form.pack()
-    form.pack_propagate(False)
-
-    form.configure(height=610)
-
-    ctk.CTkLabel(
-        form,
-        text="Student Registration",
-        font=("Arial", 22, "bold"),
-        text_color=WHITE
-    ).pack(pady=(25, 15))
-
-    school_id = create_input(form, "School ID")
-    name = create_input(form, "Full Name")
-    course = create_input(form, "Course")
-
-    year = ctk.CTkComboBox(
-        form,
-        values=["1ST", "2ND", "3RD", "4TH"],
-        height=44,
-        corner_radius=8,
-        fg_color=CARD_2,
-        border_color=BORDER,
-        button_color=PURPLE,
-        button_hover_color=PURPLE_HOVER,
-        text_color=WHITE
-    )
-    year.set("1ST")
-    year.pack(fill="x", pady=6)
-
-    section = create_input(form, "Section")
-    password = create_input(form, "Password", show="*")
-    confirm = create_input(form, "Confirm Password", show="*")
-
-    def register():
-        sid = school_id.get().strip()
-        fullname = name.get().strip()
-        course_value = course.get().strip().upper()
-        year_value = year.get().strip().upper()
-        section_value = section.get().strip().upper()
-        password_value = password.get()
-        confirm_value = confirm.get()
-
-        if not sid or not fullname or not course_value or not section_value:
-            messagebox.showerror(
-                "Registration Error",
-                "Please complete all fields."
-            )
-            return
-
-        if len(password_value) < 6:
-            messagebox.showerror(
-                "Registration Error",
-                "Password must contain at least 6 characters."
-            )
-            return
-
-        if password_value != confirm_value:
-            messagebox.showerror(
-                "Registration Error",
-                "Passwords do not match."
-            )
-            return
-
-        connection = get_connection()
-
-        try:
-            connection.execute("""
-                INSERT INTO students
-                (school_id, password, name, course, year, section)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                sid,
-                hash_password(password_value),
-                fullname,
-                course_value,
-                year_value,
-                section_value
-            ))
-
-            connection.commit()
-
-            messagebox.showinfo(
-                "Account Created",
-                "Student account successfully created.\n\nHi " + fullname + "! Your AttendX account is ready."
-            )
-
-            student_login_page(app)
-
-        except sqlite3.IntegrityError:
-            messagebox.showerror(
-                "Registration Error",
-                "School ID already exists.\nPlease use another School ID."
-            )
-
-        finally:
-            connection.close()
-
-    create_button(
-        form,
-        "CREATE ACCOUNT",
-        register,
-        width=300
-    ).pack(pady=(15, 8))
-
-    create_button(
-        form,
-        "BACK",
-        lambda: student_portal(app),
-        width=300,
-        fg_color="#242B40",
-        hover_color="#323B55"
-    ).pack(pady=5)
-
-
-# ============================================================
-# STUDENT LOGIN
 # ============================================================
 
 def student_login_page(app):
@@ -1264,140 +992,6 @@ def student_forgot_password(app):
 
 # ============================================================
 # STUDENT DASHBOARD
-# ============================================================
-
-def student_dashboard(app, student):
-    clear_screen(app)
-
-    create_top_bar(app, app)
-
-    welcome = ctk.CTkFrame(app, fg_color="transparent")
-    welcome.pack(fill="x", padx=50, pady=(18, 0))
-
-    ctk.CTkLabel(
-        welcome,
-        text="HI, " + student[2].upper() + "! 👋",
-        font=("Arial", 20, "bold"),
-        text_color=WHITE
-    ).pack(anchor="w")
-
-    ctk.CTkLabel(
-        welcome,
-        text="You're back. Here's your AttendX student account.",
-        font=("Arial", 11),
-        text_color=MUTED
-    ).pack(anchor="w", pady=(2, 0))
-
-    profile = ctk.CTkFrame(
-        app,
-        fg_color=CARD,
-        height=150,
-        corner_radius=15,
-        border_width=1,
-        border_color=BORDER
-    )
-    profile.pack(fill="x", padx=50, pady=(25, 15))
-    profile.pack_propagate(False)
-
-    left = ctk.CTkFrame(profile, fg_color="transparent")
-    left.pack(side="left", padx=30, pady=20)
-
-    ctk.CTkLabel(
-        left,
-        text=student[2],
-        font=("Arial", 25, "bold"),
-        text_color=WHITE
-    ).pack(anchor="w")
-
-    ctk.CTkLabel(
-        left,
-        text="Student ID: " + student[1],
-        font=("Arial", 11),
-        text_color=MUTED
-    ).pack(anchor="w", pady=4)
-
-    ctk.CTkLabel(
-        left,
-        text=student[3] + "  •  " + student[4] + " Year  •  Section " + student[5],
-        font=("Arial", 12),
-        text_color=TEXT
-    ).pack(anchor="w")
-
-    profile_right = ctk.CTkFrame(profile, fg_color="transparent")
-    profile_right.pack(side="right", padx=25, pady=15)
-    create_live_datetime(profile_right).pack(anchor="e")
-    ctk.CTkLabel(
-        profile_right,
-        text="STUDENT",
-        font=("Arial", 11, "bold"),
-        text_color=PURPLE
-    ).pack(anchor="e", pady=(5, 0))
-
-    menu = ctk.CTkFrame(app, fg_color="transparent")
-    menu.pack(expand=True)
-
-    buttons = [
-        (
-            "ADD MY SUBJECT",
-            "Connect yourself to a class using your teacher information.",
-            lambda: student_add_subject_page(app, student)
-        ),
-        (
-            "MY SUBJECTS",
-            "View your currently enrolled classes.",
-            lambda: student_my_subjects_page(app, student)
-        ),
-        (
-            "MY ATTENDANCE",
-            "View your attendance history.",
-            lambda: student_attendance_page(app, student)
-        ),
-        (
-            "MY PROFILE",
-            "View your information and class QR codes.",
-            lambda: student_profile_page(app, student)
-        )
-    ]
-
-    for title, description, command in buttons:
-        card = ctk.CTkFrame(
-            menu,
-            width=800,
-            height=75,
-            fg_color=CARD,
-            corner_radius=12,
-            border_width=1,
-            border_color=BORDER
-        )
-        card.pack(pady=6)
-        card.pack_propagate(False)
-
-        create_button(
-            card,
-            title,
-            command,
-            width=190
-        ).pack(side="left", padx=15, pady=16)
-
-        ctk.CTkLabel(
-            card,
-            text=description,
-            font=("Arial", 11),
-            text_color=TEXT
-        ).pack(side="left", padx=10)
-
-    create_button(
-        app,
-        "LOG OUT",
-        lambda: role_selection(app),
-        width=180,
-        fg_color="#242B40",
-        hover_color="#323B55"
-    ).pack(pady=(5, 25))
-
-
-# ============================================================
-# STUDENT ADD SUBJECT
 # ============================================================
 
 def student_add_subject_page(app, student):
@@ -3440,278 +3034,6 @@ def face_register_action(student):
 # BIOMETRIC PLACEHOLDER
 # ============================================================
 
-def face_attendance_action(app, teacher, selected_schedule):
-    try:
-        import cv2
-        import face_recognition
-
-        from face_system import find_student_by_face
-
-        schedule_id = selected_schedule[0]
-        subject = selected_schedule[1]
-
-        camera = cv2.VideoCapture(0)
-
-        if not camera.isOpened():
-            messagebox.showerror(
-                'FACE ATTENDANCE',
-                'Unable to open camera.'
-            )
-            return
-
-        messagebox.showinfo(
-            'FACE ATTENDANCE',
-            'Camera will open.\n\n'
-            'Look directly at the camera.\n'
-            'Make sure only ONE person is visible.\n'
-            'Use the on-screen SCAN button to scan.\n'
-            'Use CANCEL to close the camera.'
-        )
-
-        captured_encoding = None
-        scan_requested = False
-        cancel_requested = False
-
-        def camera_mouse(event, x, y, flags, param):
-            nonlocal scan_requested, cancel_requested
-
-            if event != cv2.EVENT_LBUTTONDOWN:
-                return
-
-            height, width = param
-
-            scan_left = width - 250
-            scan_top = height - 80
-            scan_right = width - 130
-            scan_bottom = height - 25
-
-            cancel_left = width - 120
-            cancel_top = height - 80
-            cancel_right = width - 20
-            cancel_bottom = height - 25
-
-            if scan_left <= x <= scan_right and scan_top <= y <= scan_bottom:
-                scan_requested = True
-
-            if cancel_left <= x <= cancel_right and cancel_top <= y <= cancel_bottom:
-                cancel_requested = True
-
-        window_name = 'AttendX FACE ATTENDANCE'
-        cv2.namedWindow(window_name)
-
-        while True:
-            success, frame = camera.read()
-
-            if not success:
-                break
-
-            rgb_frame = cv2.cvtColor(
-                frame,
-                cv2.COLOR_BGR2RGB
-            )
-
-            face_locations = face_recognition.face_locations(
-                rgb_frame,
-                model="hog"
-            )
-
-            face_encodings = []
-
-            if len(face_locations) == 1:
-                face_encodings = face_recognition.face_encodings(
-                    rgb_frame,
-                    face_locations
-                )
-
-            for location in face_locations:
-                top, right, bottom, left = location
-
-                cv2.rectangle(
-                    frame,
-                    (left, top),
-                    (right, bottom),
-                    (0, 255, 0),
-                    2
-                )
-
-                cv2.putText(
-                    frame,
-                    'FACE DETECTED',
-                    (left, max(top - 10, 20)),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.7,
-                    (0, 255, 0),
-                    2
-                )
-
-            if len(face_locations) == 1 and len(face_encodings) == 1:
-                status_text = 'ONE FACE DETECTED - READY TO SCAN'
-                status_color = (0, 255, 0)
-            elif len(face_locations) > 1:
-                status_text = 'ONLY ONE FACE ALLOWED'
-                status_color = (0, 0, 255)
-            else:
-                status_text = 'NO FACE DETECTED'
-                status_color = (0, 0, 255)
-
-            cv2.putText(
-                frame,
-                status_text,
-                (20, 35),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.7,
-                status_color,
-                2
-            )
-
-            height, width = frame.shape[:2]
-
-            cv2.rectangle(
-                frame,
-                (width - 250, height - 80),
-                (width - 130, height - 25),
-                (70, 70, 210),
-                -1
-            )
-            cv2.putText(
-                frame,
-                'SCAN',
-                (width - 222, height - 43),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.65,
-                (255, 255, 255),
-                2
-            )
-
-            cv2.rectangle(
-                frame,
-                (width - 120, height - 80),
-                (width - 20, height - 25),
-                (80, 80, 80),
-                -1
-            )
-            cv2.putText(
-                frame,
-                'CANCEL',
-                (width - 112, height - 43),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.55,
-                (255, 255, 255),
-                2
-            )
-
-            cv2.putText(
-                frame,
-                'Click a button below',
-                (20, height - 30),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.55,
-                (255, 255, 255),
-                2
-            )
-
-            cv2.setMouseCallback(
-                window_name,
-                camera_mouse,
-                (height, width)
-            )
-
-            cv2.imshow(window_name, frame)
-
-            cv2.waitKey(1)
-
-            if cancel_requested:
-                break
-
-            if (
-                scan_requested
-                and len(face_locations) == 1
-                and len(face_encodings) == 1
-            ):
-                captured_encoding = face_encodings[0]
-                break
-
-            scan_requested = False
-
-        camera.release()
-        cv2.destroyAllWindows()
-
-        if captured_encoding is None:
-            messagebox.showwarning(
-                'FACE ATTENDANCE',
-                'Face scan was cancelled or no valid single face was captured.'
-            )
-            return
-
-        result = find_student_by_face(
-            captured_encoding
-        )
-
-        if not result.get('found'):
-            distance = result.get('distance')
-
-            if distance is not None:
-                messagebox.showerror(
-                    'FACE ATTENDANCE',
-                    'No matching student face found.\n\n'
-                    'Face distance: ' + str(round(float(distance), 4))
-                )
-            else:
-                messagebox.showerror(
-                    'FACE ATTENDANCE',
-                    result.get(
-                        'message',
-                        'No matching student face found.'
-                    )
-                )
-
-            return
-
-        student_id = result.get('student_id')
-        distance = result.get('distance')
-
-        success, attendance_result = record_attendance(
-            student_id,
-            schedule_id,
-            'FACE'
-        )
-
-        if success:
-            distance_text = ''
-
-            if distance is not None:
-                distance_text = (
-                    '\nFace distance: '
-                    + str(round(float(distance), 4))
-                )
-
-            messagebox.showinfo(
-                'FACE ATTENDANCE',
-                'Attendance recorded successfully.\n\n'
-                + 'Student ID: ' + str(student_id)
-                + '\nSubject: ' + str(subject)
-                + distance_text
-            )
-        else:
-            messagebox.showwarning(
-                'FACE ATTENDANCE',
-                str(attendance_result)
-            )
-
-    except ImportError as error:
-        messagebox.showerror(
-            'FACE ATTENDANCE',
-            'Required face recognition package is not installed.\n\n'
-            + str(error)
-        )
-    except Exception as error:
-        messagebox.showerror(
-            'FACE ATTENDANCE',
-            'Face attendance error.\n\n'
-            + str(error)
-        )
-
-
 def biometric_coming_soon(title):
     messagebox.showinfo(
         title,
@@ -3723,79 +3045,6 @@ def biometric_coming_soon(title):
 
 # ============================================================
 # FINGERPRINT ACTIONS
-# ============================================================
-
-def fingerprint_register_action(student):
-    messagebox.showinfo(
-        "FINGERPRINT REGISTRATION",
-        "Fingerprint Registration is prepared as part of the AttendX system.\n\n"
-        "This module will be connected to the fingerprint scanner "
-        "in the next development stage."
-    )
-
-
-# ============================================================
-
-def fingerprint_register_action(student):
-    try:
-        fingerprint = FingerprintSystem()
-        status = fingerprint.get_device_status()
-
-        if not status["available"]:
-            messagebox.showwarning(
-                "Fingerprint Device",
-                "No fingerprint device detected.\n\n"
-                "This laptop does not have a supported fingerprint "
-                "sensor connected.\n\n"
-                "You can connect a supported fingerprint reader "
-                "later."
-            )
-            return
-
-        messagebox.showinfo(
-            "Fingerprint Device",
-            "Fingerprint device detected.\n\n"
-            "The device is ready for fingerprint registration."
-        )
-
-    except Exception as error:
-        messagebox.showerror(
-            "Fingerprint Error",
-            "Could not check the fingerprint device.\n\n"
-            + str(error)
-        )
-
-
-def fingerprint_attendance_action(app, teacher, selected_schedule):
-    try:
-        fingerprint = FingerprintSystem()
-        status = fingerprint.get_device_status()
-
-        if not status["available"]:
-            messagebox.showwarning(
-                "Fingerprint Attendance",
-                "No fingerprint device detected.\n\n"
-                "Please connect a supported fingerprint reader "
-                "to this laptop before using fingerprint attendance."
-            )
-            return
-
-        messagebox.showinfo(
-            "Fingerprint Attendance",
-            "Fingerprint device detected.\n\n"
-            "The device is ready for fingerprint attendance."
-        )
-
-    except Exception as error:
-        messagebox.showerror(
-            "Fingerprint Error",
-            "Could not check the fingerprint device.\n\n"
-            + str(error)
-        )
-
-
-# ============================================================
-# TEACHER PORTAL
 # ============================================================
 
 def teacher_portal(app):
@@ -3850,222 +3099,6 @@ def teacher_portal(app):
 
 # ============================================================
 # TEACHER REGISTER
-# ============================================================
-
-def teacher_register_page(app):
-    clear_screen(app)
-
-    create_top_bar(
-        app,
-        app,
-        True,
-        lambda: teacher_portal(app)
-    )
-
-    create_page_title(
-        app,
-        "CREATE TEACHER ACCOUNT",
-        "Enter your official teacher information."
-    )
-
-    form = ctk.CTkFrame(
-        app,
-        width=520,
-        height=430,
-        fg_color=CARD,
-        corner_radius=18,
-        border_width=1,
-        border_color=BORDER
-    )
-    form.pack(expand=True)
-    form.pack_propagate(False)
-
-    ctk.CTkLabel(
-        form,
-        text="Teacher Registration",
-        font=("Arial", 22, "bold"),
-        text_color=WHITE
-    ).pack(pady=(30, 20))
-
-    teacher_id = create_input(form, "Teacher ID / School ID")
-    name = create_input(form, "Teacher Name")
-    password = create_input(form, "Password", show="*")
-    confirm = create_input(form, "Confirm Password", show="*")
-
-    def register():
-        tid = teacher_id.get().strip()
-        teacher_name = name.get().strip()
-        pass_value = password.get()
-        confirm_value = confirm.get()
-
-        if not tid or not teacher_name or not pass_value:
-            messagebox.showerror(
-                "Error",
-                "Please complete all fields."
-            )
-            return
-
-        if len(pass_value) < 6:
-            messagebox.showerror(
-                "Error",
-                "Password must contain at least 6 characters."
-            )
-            return
-
-        if pass_value != confirm_value:
-            messagebox.showerror(
-                "Error",
-                "Passwords do not match."
-            )
-            return
-
-        connection = get_connection()
-
-        try:
-            connection.execute("""
-                INSERT INTO teachers
-                (teacher_id, password, name)
-                VALUES (?, ?, ?)
-            """, (
-                tid,
-                hash_password(pass_value),
-                teacher_name
-            ))
-
-            connection.commit()
-
-            messagebox.showinfo(
-                "Account Created",
-                "Teacher account successfully created.\n\nHi " + teacher_name + "! Your AttendX account is ready."
-            )
-
-            teacher_login_page(app)
-
-        except sqlite3.IntegrityError:
-            messagebox.showerror(
-                "Error",
-                "Teacher ID already exists.\n"
-                "Please use another Teacher ID."
-            )
-
-        finally:
-            connection.close()
-
-    create_button(
-        form,
-        "CREATE ACCOUNT",
-        register,
-        width=300
-    ).pack(pady=(15, 8))
-
-    create_button(
-        form,
-        "BACK",
-        lambda: teacher_portal(app),
-        width=300,
-        fg_color="#242B40",
-        hover_color="#323B55"
-    ).pack()
-
-
-# ============================================================
-# TEACHER LOGIN
-# ============================================================
-
-def teacher_login_page(app):
-    clear_screen(app)
-
-    create_top_bar(
-        app,
-        app,
-        True,
-        lambda: teacher_portal(app)
-    )
-
-    create_page_title(
-        app,
-        "TEACHER LOGIN",
-        "Login using your Teacher ID and password."
-    )
-
-    form = ctk.CTkFrame(
-        app,
-        width=500,
-        height=360,
-        fg_color=CARD,
-        corner_radius=18,
-        border_width=1,
-        border_color=BORDER
-    )
-    form.pack(expand=True)
-    form.pack_propagate(False)
-
-    ctk.CTkLabel(
-        form,
-        text="Teacher Login",
-        font=("Arial", 24, "bold"),
-        text_color=WHITE
-    ).pack(pady=(35, 20))
-
-    teacher_id = create_input(form, "Teacher ID")
-    password = create_input(form, "Password", show="*")
-
-    def login():
-        tid = teacher_id.get().strip()
-        password_value = password.get()
-
-        if not tid or not password_value:
-            messagebox.showerror(
-                "Login Error",
-                "Please enter your Teacher ID and password."
-            )
-            return
-
-        connection = get_connection()
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            SELECT id, teacher_id, name
-            FROM teachers
-            WHERE teacher_id = ? AND password = ?
-        """, (
-            tid,
-            hash_password(password_value)
-        ))
-
-        teacher = cursor.fetchone()
-        connection.close()
-
-        if teacher:
-            global CURRENT_USER_NAME, CURRENT_USER_ROLE
-            CURRENT_USER_NAME = teacher[2]
-            CURRENT_USER_ROLE = "teacher"
-            teacher_dashboard(app, teacher)
-        else:
-            messagebox.showerror(
-                "Login Failed",
-                "Invalid Teacher ID or password."
-            )
-
-    create_button(
-        form,
-        "LOG IN",
-        login,
-        width=300
-    ).pack(pady=(15, 8))
-
-    create_button(
-        form,
-        "FORGOT PASSWORD",
-        lambda: teacher_forgot_password(app),
-        width=300,
-        fg_color="#242B40",
-        hover_color="#323B55"
-    ).pack()
-
-
-# ============================================================
-# TEACHER FORGOT PASSWORD
 # ============================================================
 
 def teacher_forgot_password(app):
@@ -4310,255 +3343,6 @@ def create_time_selector(parent, label_text, default_hour="7",
 
 # ============================================================
 # TEACHER ADD SCHEDULE
-# ============================================================
-
-def teacher_add_schedule_page(app, teacher):
-    clear_screen(app)
-
-    create_top_bar(
-        app,
-        app,
-        True,
-        lambda: teacher_dashboard(app, teacher)
-    )
-
-    create_page_title(
-        app,
-        "ADD SCHEDULE",
-        "Create a class schedule for your students."
-    )
-
-    form = ctk.CTkFrame(
-        app,
-        width=600,
-        height=720,
-        fg_color=CARD,
-        corner_radius=18,
-        border_width=1,
-        border_color=BORDER
-    )
-    form.pack(expand=True)
-    form.pack_propagate(False)
-
-    ctk.CTkLabel(
-        form,
-        text="Class Schedule",
-        font=("Arial", 23, "bold"),
-        text_color=WHITE
-    ).pack(pady=(25, 15))
-
-    course = create_input(form, "Course")
-    subject = create_input(form, "Subject")
-    section = create_input(form, "Section")
-
-    year = ctk.CTkComboBox(
-        form,
-        values=["1ST", "2ND", "3RD", "4TH"],
-        height=44,
-        corner_radius=8,
-        fg_color=CARD_2,
-        border_color=BORDER,
-        button_color=PURPLE,
-        button_hover_color=PURPLE_HOVER,
-        text_color=WHITE
-    )
-    year.set("1ST")
-    year.pack(fill="x", pady=6)
-
-    day = ctk.CTkComboBox(
-        form,
-        values=[
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday"
-        ],
-        height=44,
-        corner_radius=8,
-        fg_color=CARD_2,
-        border_color=BORDER,
-        button_color=PURPLE,
-        button_hover_color=PURPLE_HOVER,
-        text_color=WHITE
-    )
-    day.set("Monday")
-    day.pack(fill="x", pady=6)
-
-    _, start_hour, start_minute, start_period = create_time_selector(
-        form,
-        "Start Time",
-        default_hour="7",
-        default_minute="00",
-        default_period="AM"
-    )
-
-    _, end_hour, end_minute, end_period = create_time_selector(
-        form,
-        "End Time",
-        default_hour="10",
-        default_minute="00",
-        default_period="AM"
-    )
-
-    def save_schedule():
-        course_value = course.get().strip().upper()
-        subject_value = subject.get().strip().upper()
-        section_value = section.get().strip().upper()
-        year_value = year.get().strip().upper()
-        day_value = day.get().strip()
-
-        start_value = to_24_hour(
-            start_hour.get(),
-            start_minute.get(),
-            start_period.get()
-        )
-
-        end_value = to_24_hour(
-            end_hour.get(),
-            end_minute.get(),
-            end_period.get()
-        )
-
-        if not course_value or not subject_value or not section_value:
-            messagebox.showerror(
-                "Error",
-                "Please complete all fields."
-            )
-            return
-
-        start_minutes = convert_time(start_value)
-        end_minutes = convert_time(end_value)
-
-        if start_minutes is None or end_minutes is None:
-            messagebox.showerror(
-                "Invalid Time",
-                "Please select a valid start and end time."
-            )
-            return
-
-        if start_minutes >= end_minutes:
-            messagebox.showerror(
-                "Invalid Time",
-                "End time must be later than start time."
-            )
-            return
-
-        connection = get_connection()
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            SELECT id
-            FROM schedules
-            WHERE teacher_id = ?
-              AND UPPER(course) = UPPER(?)
-              AND UPPER(subject) = UPPER(?)
-              AND UPPER(section) = UPPER(?)
-              AND UPPER(year) = UPPER(?)
-              AND day = ?
-              AND start_time = ?
-              AND end_time = ?
-        """, (
-            teacher[0],
-            course_value,
-            subject_value,
-            section_value,
-            year_value,
-            day_value,
-            start_value,
-            end_value
-        ))
-
-        duplicate = cursor.fetchone()
-
-        if duplicate:
-            connection.close()
-
-            messagebox.showerror(
-                "Duplicate Schedule",
-                "This exact schedule already exists."
-            )
-            return
-
-        cursor.execute("""
-            SELECT start_time, end_time
-            FROM schedules
-            WHERE teacher_id = ?
-              AND day = ?
-        """, (
-            teacher[0],
-            day_value
-        ))
-
-        existing_schedules = cursor.fetchall()
-
-        for existing_start, existing_end in existing_schedules:
-            old_start = convert_time(existing_start)
-            old_end = convert_time(existing_end)
-
-            if start_minutes < old_end and end_minutes > old_start:
-                connection.close()
-
-                messagebox.showerror(
-                    "Schedule Conflict",
-                    "This schedule overlaps with another schedule "
-                    "for the same teacher and day."
-                )
-                return
-
-        cursor.execute("""
-            INSERT INTO schedules
-            (
-                teacher_id,
-                course,
-                subject,
-                section,
-                year,
-                day,
-                start_time,
-                end_time
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            teacher[0],
-            course_value,
-            subject_value,
-            section_value,
-            year_value,
-            day_value,
-            start_value,
-            end_value
-        ))
-
-        connection.commit()
-        connection.close()
-
-        messagebox.showinfo(
-            "Schedule Added",
-            "Class schedule successfully added."
-        )
-
-        teacher_dashboard(app, teacher)
-
-    create_button(
-        form,
-        "SAVE SCHEDULE",
-        save_schedule,
-        width=300
-    ).pack(pady=(20, 8))
-
-    create_button(
-        form,
-        "CANCEL",
-        lambda: teacher_dashboard(app, teacher),
-        width=300,
-        fg_color="#242B40",
-        hover_color="#323B55"
-    ).pack()
-
-
-# ============================================================
-# TEACHER ADD SUBJECT - DESIGN COMPANION
 # ============================================================
 
 def teacher_add_subject_page(app, teacher):
@@ -5132,168 +3916,6 @@ def teacher_my_students_page(app, teacher):
 # ATTENDANCE STATUS
 # ============================================================
 
-def get_attendance_status(schedule_start_time):
-    now = datetime.now()
-
-    current_minutes = (
-        now.hour * 60
-        + now.minute
-    )
-
-    start_minutes = convert_time(
-        schedule_start_time
-    )
-
-    if start_minutes is None:
-        return "PRESENT"
-
-    # --------------------------------------------------------
-    # PRESENT
-    # If the student verifies before or up to 15 minutes
-    # after the scheduled start time.
-    # --------------------------------------------------------
-
-    if current_minutes <= start_minutes + 15:
-        return "PRESENT"
-
-    # --------------------------------------------------------
-    # LATE
-    # More than 15 minutes after scheduled start.
-    # --------------------------------------------------------
-
-    return "LATE"
-
-
-# ============================================================
-# RECORD ATTENDANCE
-# ============================================================
-
-def record_attendance(student_id, schedule_id, method):
-    now = datetime.now()
-
-    attendance_date = now.strftime("%Y-%m-%d")
-    attendance_time = now.strftime("%H:%M:%S")
-
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    # --------------------------------------------------------
-    # CHECK STUDENT CLASS MEMBERSHIP
-    # --------------------------------------------------------
-
-    cursor.execute("""
-        SELECT id
-        FROM student_classes
-        WHERE student_id = ?
-          AND schedule_id = ?
-    """, (
-        student_id,
-        schedule_id
-    ))
-
-    membership = cursor.fetchone()
-
-    if not membership:
-        connection.close()
-
-        return False, "Student is not enrolled in this class."
-
-    # --------------------------------------------------------
-    # GET SCHEDULE START TIME
-    # --------------------------------------------------------
-
-    cursor.execute("""
-        SELECT start_time
-        FROM schedules
-        WHERE id = ?
-    """, (schedule_id,))
-
-    schedule = cursor.fetchone()
-
-    if not schedule:
-        connection.close()
-
-        return False, "Schedule does not exist."
-
-    status = get_attendance_status(
-        schedule[0]
-    )
-
-    # --------------------------------------------------------
-    # CHECK DUPLICATE ATTENDANCE
-    # --------------------------------------------------------
-
-    cursor.execute("""
-        SELECT
-            id,
-            attendance_time,
-            status
-        FROM attendance
-        WHERE student_id = ?
-          AND schedule_id = ?
-          AND attendance_date = ?
-    """, (
-        student_id,
-        schedule_id,
-        attendance_date
-    ))
-
-    existing = cursor.fetchone()
-
-    if existing:
-        connection.close()
-
-        return False, (
-            "Attendance already recorded for today.\n\n"
-            "Time: "
-            + existing[1]
-            + "\nStatus: "
-            + existing[2]
-        )
-
-    # --------------------------------------------------------
-    # INSERT ATTENDANCE
-    # --------------------------------------------------------
-
-    try:
-        cursor.execute("""
-            INSERT INTO attendance
-            (
-                student_id,
-                schedule_id,
-                attendance_date,
-                attendance_time,
-                status,
-                method
-            )
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            student_id,
-            schedule_id,
-            attendance_date,
-            attendance_time,
-            status,
-            method
-        ))
-
-        connection.commit()
-        connection.close()
-
-        return True, status
-
-    except sqlite3.IntegrityError:
-        connection.close()
-
-        return False, (
-            "Attendance for this student and class "
-            "has already been recorded today."
-        )
-
-
-# ============================================================
-# TEACHER ATTENDANCE
-# ============================================================
-
 def teacher_attendance_page(app, teacher):
     clear_screen(app)
 
@@ -5493,518 +4115,6 @@ def teacher_attendance_page(app, teacher):
 
 # ============================================================
 # QR ATTENDANCE
-# ============================================================
-
-def attendance_qr_page(app, teacher, selected_schedule):
-    # selected_schedule is the raw schedule row:
-    # (id, subject, course, year, section, day, start_time, end_time)
-    schedule_id = selected_schedule[0]
-    schedule_subject = selected_schedule[1]
-    schedule_course = selected_schedule[2]
-    schedule_year = selected_schedule[3]
-    schedule_section = selected_schedule[4]
-    schedule_day = selected_schedule[5]
-    schedule_start = selected_schedule[6]
-    schedule_end = selected_schedule[7]
-
-    clear_screen(app)
-
-    create_top_bar(
-        app,
-        app,
-        True,
-        lambda: teacher_attendance_page(app, teacher)
-    )
-
-    create_page_title(
-        app,
-        "QR ATTENDANCE",
-        "Verify the student's QR code against the selected class."
-    )
-
-    form = ctk.CTkFrame(
-        app,
-        width=700,
-        height=560,
-        fg_color=CARD,
-        corner_radius=18,
-        border_width=1,
-        border_color=BORDER
-    )
-    form.pack(expand=True)
-    form.pack_propagate(False)
-
-    ctk.CTkLabel(
-        form,
-        text="QR VERIFICATION",
-        font=("Arial", 23, "bold"),
-        text_color=WHITE
-    ).pack(pady=(30, 8))
-
-    ctk.CTkLabel(
-        form,
-        text="Selected Class",
-        font=("Arial", 10, "bold"),
-        text_color=MUTED
-    ).pack()
-
-    selected_display = (
-        schedule_subject
-        + " | " + schedule_course
-        + " | " + schedule_year
-        + " | Section " + schedule_section
-        + " | " + schedule_day
-        + " " + format_time_12h(schedule_start)
-        + "-" + format_time_12h(schedule_end)
-    )
-
-    ctk.CTkLabel(
-        form,
-        text=selected_display,
-        font=("Arial", 11),
-        text_color=PURPLE,
-        wraplength=600
-    ).pack(pady=(5, 20))
-
-    token_entry = create_input(
-        form,
-        "Enter / Scan QR Token"
-    )
-
-    result_label = ctk.CTkLabel(
-        form,
-        text="",
-        font=("Arial", 12, "bold"),
-        text_color=TEXT
-    )
-    result_label.pack(pady=15)
-
-    attendance_label = ctk.CTkLabel(
-        form,
-        text="",
-        font=("Arial", 11),
-        text_color=TEXT
-    )
-    attendance_label.pack(pady=5)
-
-    def verify():
-        token = token_entry.get().strip()
-
-        if not token:
-            messagebox.showerror(
-                "Verification Error",
-                "Please scan or enter the QR token."
-            )
-            return
-
-        connection = get_connection()
-        cursor = connection.cursor()
-
-        # ----------------------------------------------------
-        # GET QR RECORD
-        # ----------------------------------------------------
-
-        cursor.execute("""
-            SELECT
-                qr_codes.student_id,
-                qr_codes.schedule_id,
-                students.school_id,
-                students.name,
-                students.course,
-                students.year,
-                students.section,
-                schedules.subject,
-                schedules.teacher_id,
-                teachers.name,
-                schedules.start_time
-            FROM qr_codes
-            INNER JOIN students
-                ON qr_codes.student_id = students.id
-            INNER JOIN schedules
-                ON qr_codes.schedule_id = schedules.id
-            INNER JOIN teachers
-                ON schedules.teacher_id = teachers.id
-            WHERE qr_codes.token = ?
-        """, (token,))
-
-        record = cursor.fetchone()
-
-        if not record:
-            connection.close()
-
-            result_label.configure(
-                text="ACCESS DENIED — QR CODE NOT FOUND",
-                text_color=ERROR
-            )
-
-            attendance_label.configure(
-                text="",
-                text_color=TEXT
-            )
-
-            return
-
-        qr_student_id = record[0]
-        qr_schedule_id = record[1]
-
-        # ----------------------------------------------------
-        # CHECK SELECTED CLASS
-        # ----------------------------------------------------
-
-        if qr_schedule_id != schedule_id:
-            connection.close()
-
-            result_label.configure(
-                text="ACCESS DENIED — WRONG CLASS QR",
-                text_color=ERROR
-            )
-
-            attendance_label.configure(
-                text="The QR belongs to another class.",
-                text_color=ERROR
-            )
-
-            messagebox.showerror(
-                "Wrong Class",
-                "This QR code belongs to another class."
-            )
-
-            return
-
-        # ----------------------------------------------------
-        # CHECK TEACHER
-        # ----------------------------------------------------
-
-        if record[8] != teacher[0]:
-            connection.close()
-
-            result_label.configure(
-                text="ACCESS DENIED — TEACHER MISMATCH",
-                text_color=ERROR
-            )
-
-            attendance_label.configure(
-                text="The selected class does not belong to this teacher.",
-                text_color=ERROR
-            )
-
-            return
-
-        # ----------------------------------------------------
-        # CHECK COURSE
-        # ----------------------------------------------------
-
-        if record[4].upper() != schedule_course.upper():
-            connection.close()
-
-            result_label.configure(
-                text="ACCESS DENIED — COURSE MISMATCH",
-                text_color=ERROR
-            )
-
-            return
-
-        # ----------------------------------------------------
-        # CHECK YEAR
-        # ----------------------------------------------------
-
-        if record[5].upper() != schedule_year.upper():
-            connection.close()
-
-            result_label.configure(
-                text="ACCESS DENIED — YEAR MISMATCH",
-                text_color=ERROR
-            )
-
-            return
-
-        # ----------------------------------------------------
-        # CHECK SECTION
-        # ----------------------------------------------------
-
-        if record[6].upper() != schedule_section.upper():
-            connection.close()
-
-            result_label.configure(
-                text="ACCESS DENIED — SECTION MISMATCH",
-                text_color=ERROR
-            )
-
-            return
-
-        connection.close()
-
-        # ----------------------------------------------------
-        # CHECK CLASS MEMBERSHIP
-        # ----------------------------------------------------
-
-        membership_connection = get_connection()
-        membership_cursor = membership_connection.cursor()
-
-        membership_cursor.execute("""
-            SELECT id
-            FROM student_classes
-            WHERE student_id = ?
-              AND schedule_id = ?
-        """, (
-            qr_student_id,
-            schedule_id
-        ))
-
-        membership = membership_cursor.fetchone()
-        membership_connection.close()
-
-        if not membership:
-            result_label.configure(
-                text="ACCESS DENIED — STUDENT NOT ENROLLED",
-                text_color=ERROR
-            )
-
-            attendance_label.configure(
-                text="Student is not connected to this class.",
-                text_color=ERROR
-            )
-
-            messagebox.showerror(
-                "Not Enrolled",
-                "This student is not enrolled in the selected class."
-            )
-
-            return
-
-        # ----------------------------------------------------
-        # RECORD ATTENDANCE
-        # ----------------------------------------------------
-
-        success, attendance_result = record_attendance(
-            qr_student_id,
-            schedule_id,
-            "QR"
-        )
-
-        if not success:
-            result_label.configure(
-                text="STUDENT VERIFIED",
-                text_color=SUCCESS
-            )
-
-            attendance_label.configure(
-                text=attendance_result,
-                text_color=WARNING
-            )
-
-            messagebox.showwarning(
-                "Attendance",
-                attendance_result
-            )
-
-            return
-
-        # ----------------------------------------------------
-        # SUCCESS
-        # ----------------------------------------------------
-
-        result_label.configure(
-            text="VERIFIED — " + record[3],
-            text_color=SUCCESS
-        )
-
-        status_color = SUCCESS
-
-        if attendance_result == "LATE":
-            status_color = WARNING
-
-        attendance_label.configure(
-            text="ATTENDANCE RECORDED — " + attendance_result,
-            text_color=status_color
-        )
-
-        messagebox.showinfo(
-            "Attendance Recorded",
-            "Student successfully verified.\n\n"
-            "Name: "
-            + record[3]
-            + "\nSchool ID: "
-            + record[2]
-            + "\nCourse: "
-            + record[4]
-            + "\nYear: "
-            + record[5]
-            + "\nSection: "
-            + record[6]
-            + "\nSubject: "
-            + record[7]
-            + "\nStatus: "
-            + attendance_result
-            + "\nMethod: QR"
-        )
-
-        token_entry.delete(0, "end")
-
-    def scan_qr_camera():
-        try:
-            import cv2
-        except ImportError:
-            messagebox.showerror(
-                "QR Scanner Error",
-                "OpenCV is not installed."
-            )
-            return
-
-        camera = cv2.VideoCapture(0)
-
-        if not camera.isOpened():
-            messagebox.showerror(
-                "Camera Error",
-                "Cannot open the camera.\n\n"
-                "Please check if your camera is connected "
-                "and not being used by another application."
-            )
-            return
-
-        detector = cv2.QRCodeDetector()
-        scanned_token = None
-        cancel_requested = False
-
-        messagebox.showinfo(
-            "QR Scanner",
-            "Camera scanner will open.\n\n"
-            "Point the camera at the student's AttendX QR code.\n"
-            "Use the on-screen CANCEL button to close the camera."
-        )
-
-        window_name = "AttendX QR Scanner"
-        cv2.namedWindow(window_name)
-
-        def qr_mouse(event, x, y, flags, param):
-            nonlocal cancel_requested
-
-            if event != cv2.EVENT_LBUTTONDOWN:
-                return
-
-            height, width = param
-
-            if (
-                width - 170 <= x <= width - 20
-                and height - 75 <= y <= height - 20
-            ):
-                cancel_requested = True
-
-        while True:
-            success, frame = camera.read()
-
-            if not success:
-                break
-
-            data, points, _ = detector.detectAndDecode(frame)
-
-            if points is not None:
-                points = points.astype(int)
-
-                for i in range(len(points[0])):
-                    pt1 = tuple(points[0][i])
-                    pt2 = tuple(points[0][(i + 1) % len(points[0])])
-
-                    cv2.line(
-                        frame,
-                        pt1,
-                        pt2,
-                        (0, 255, 0),
-                        3
-                    )
-
-            height, width = frame.shape[:2]
-
-            cv2.putText(
-                frame,
-                "SCAN ATTENDX QR CODE",
-                (20, 40),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.8,
-                (0, 255, 0),
-                2
-            )
-
-            cv2.rectangle(
-                frame,
-                (width - 170, height - 75),
-                (width - 20, height - 20),
-                (80, 80, 80),
-                -1
-            )
-            cv2.putText(
-                frame,
-                "CANCEL",
-                (width - 145, height - 38),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.62,
-                (255, 255, 255),
-                2
-            )
-
-            cv2.putText(
-                frame,
-                "Click CANCEL to close",
-                (20, height - 30),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.55,
-                (255, 255, 255),
-                2
-            )
-
-            cv2.setMouseCallback(
-                window_name,
-                qr_mouse,
-                (height, width)
-            )
-
-            cv2.imshow(window_name, frame)
-
-            cv2.waitKey(1)
-
-            if data:
-                scanned_token = data.strip()
-                break
-
-            if cancel_requested:
-                break
-
-        camera.release()
-        cv2.destroyAllWindows()
-
-        if scanned_token:
-            token_entry.delete(0, "end")
-            token_entry.insert(0, scanned_token)
-
-            verify()
-
-
-    create_button(
-        form,
-        "SCAN QR WITH CAMERA",
-        scan_qr_camera,
-        width=260
-    ).pack(pady=10)
-
-    create_button(
-        form,
-        "VERIFY QR",
-        verify,
-        width=260
-    ).pack(pady=10)
-
-    create_button(
-        form,
-        "BACK",
-        lambda: teacher_attendance_page(app, teacher),
-        width=260,
-        fg_color="#242B40",
-        hover_color="#323B55"
-    ).pack(pady=5)
-
-
-# ============================================================
-# TEACHER ATTENDANCE RECORDS
 # ============================================================
 
 def teacher_attendance_records_page(app, teacher):
@@ -6586,6 +4696,12 @@ def teacher_dashboard(app, teacher):
     side_button("ADD SCHEDULE", lambda: teacher_add_schedule_page(app, teacher))
     side_button("MY STUDENTS", lambda: teacher_my_students_page(app, teacher))
     side_button("ATTENDANCE CENTER", lambda: teacher_attendance_menu_page(app, teacher))
+    side_button("STUDENTS", lambda: student_management_page(app, teacher))
+    side_button("SUBJECTS", lambda: subject_management_page(app, teacher))
+    side_button("CLASSES / SECTIONS", lambda: class_management_page(app, teacher))
+    side_button("ATTENDANCE HISTORY", lambda: teacher_attendance_records_page(app, teacher))
+    side_button("REPORTS", lambda: reports_page(app, teacher))
+    side_button("BACKUP / RESTORE", lambda: backup_restore_page(app, teacher))
 
     ctk.CTkFrame(sidebar, fg_color="transparent").pack(fill="both", expand=True)
 
@@ -6919,6 +5035,2775 @@ def main():
     role_selection(app)
 
     app.mainloop()
+
+
+
+# ============================================================
+# ATTENDX MAIN.PY UPGRADE LAYER
+# ============================================================
+# This section intentionally overrides only the UI/behavior that
+# requires the current AttendX upgrade. The original application
+# remains above this layer so existing working features stay
+# available and backward compatible.
+
+UPGRADE_VERSION = "2026.10.03-MAIN-UPGRADE"
+QR_EXPIRATION_HOURS = 24
+NAME_ALLOWED_CHARACTERS = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .'-")
+
+def _column_exists(table_name, column_name):
+    connection = get_connection()
+    cursor = connection.cursor()
+    try:
+        cursor.execute("PRAGMA table_info(" + table_name + ")")
+        return any(row[1] == column_name for row in cursor.fetchall())
+    finally:
+        connection.close()
+
+
+def _add_column_if_missing(table_name, column_name, definition):
+    if _column_exists(table_name, column_name):
+        return
+    connection = get_connection()
+    try:
+        connection.execute(
+            "ALTER TABLE " + table_name +
+            " ADD COLUMN " + column_name + " " + definition
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+
+def _ensure_attendx_upgrade_schema():
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    # --------------------------------------------------------
+    # Backward-compatible student name structure.
+    # Existing "name" is retained for every old module.
+    # --------------------------------------------------------
+    student_columns = [
+        ("first_name", "TEXT DEFAULT ''"),
+        ("last_name", "TEXT DEFAULT ''"),
+        ("middle_name", "TEXT DEFAULT ''"),
+        ("suffix", "TEXT DEFAULT ''"),
+        ("sex", "TEXT DEFAULT ''"),
+        ("status", "TEXT DEFAULT 'ACTIVE'"),
+        ("created_at", "TEXT DEFAULT CURRENT_TIMESTAMP"),
+        ("updated_at", "TEXT DEFAULT CURRENT_TIMESTAMP"),
+    ]
+
+    teacher_columns = [
+        ("first_name", "TEXT DEFAULT ''"),
+        ("last_name", "TEXT DEFAULT ''"),
+        ("middle_name", "TEXT DEFAULT ''"),
+        ("suffix", "TEXT DEFAULT ''"),
+        ("role", "TEXT DEFAULT 'TEACHER'"),
+        ("status", "TEXT DEFAULT 'ACTIVE'"),
+        ("created_at", "TEXT DEFAULT CURRENT_TIMESTAMP"),
+        ("updated_at", "TEXT DEFAULT CURRENT_TIMESTAMP"),
+    ]
+
+    # SQLite allows these ALTER operations because every added
+    # column has a default value.
+    for column_name, definition in student_columns:
+        try:
+            cursor.execute("PRAGMA table_info(students)")
+            existing = {row[1] for row in cursor.fetchall()}
+            if column_name not in existing:
+                cursor.execute(
+                    "ALTER TABLE students ADD COLUMN "
+                    + column_name + " " + definition
+                )
+        except Exception:
+            pass
+
+    for column_name, definition in teacher_columns:
+        try:
+            cursor.execute("PRAGMA table_info(teachers)")
+            existing = {row[1] for row in cursor.fetchall()}
+            if column_name not in existing:
+                cursor.execute(
+                    "ALTER TABLE teachers ADD COLUMN "
+                    + column_name + " " + definition
+                )
+        except Exception:
+            pass
+
+    # Centralized subjects.
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS subjects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subject_code TEXT UNIQUE NOT NULL,
+            subject_name TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'ACTIVE',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # Store the selected centralized subject code on schedules
+    # without changing the existing subject column used by the
+    # current AttendX modules.
+    try:
+        cursor.execute("PRAGMA table_info(schedules)")
+        schedule_columns = {row[1] for row in cursor.fetchall()}
+        if "subject_code" not in schedule_columns:
+            cursor.execute(
+                "ALTER TABLE schedules ADD COLUMN subject_code TEXT DEFAULT ''"
+            )
+    except Exception:
+        pass
+
+    # Preserve existing names while populating the new fields.
+    try:
+        cursor.execute("""
+            SELECT id, name
+            FROM students
+            WHERE
+                (first_name IS NULL OR TRIM(first_name) = '')
+                AND name IS NOT NULL
+                AND TRIM(name) <> ''
+        """)
+        rows = cursor.fetchall()
+        for row in rows:
+            parts = row[1].strip().split()
+            first = parts[0] if parts else ""
+            last = parts[-1] if len(parts) > 1 else first
+            middle = " ".join(parts[1:-1]) if len(parts) > 2 else ""
+            cursor.execute("""
+                UPDATE students
+                SET first_name = ?,
+                    last_name = ?,
+                    middle_name = COALESCE(middle_name, ''),
+                    suffix = COALESCE(suffix, ''),
+                    sex = COALESCE(sex, '')
+                WHERE id = ?
+            """, (first, last, middle, row[0]))
+    except Exception:
+        pass
+
+    try:
+        cursor.execute("""
+            SELECT id, name
+            FROM teachers
+            WHERE
+                (first_name IS NULL OR TRIM(first_name) = '')
+                AND name IS NOT NULL
+                AND TRIM(name) <> ''
+        """)
+        rows = cursor.fetchall()
+        for row in rows:
+            parts = row[1].strip().split()
+            first = parts[0] if parts else ""
+            last = parts[-1] if len(parts) > 1 else first
+            middle = " ".join(parts[1:-1]) if len(parts) > 2 else ""
+            cursor.execute("""
+                UPDATE teachers
+                SET first_name = ?,
+                    last_name = ?,
+                    middle_name = COALESCE(middle_name, ''),
+                    suffix = COALESCE(suffix, '')
+                WHERE id = ?
+            """, (first, last, middle, row[0]))
+    except Exception:
+        pass
+
+    # Create centralized subject records from existing schedules.
+    try:
+        cursor.execute("""
+            SELECT DISTINCT TRIM(subject)
+            FROM schedules
+            WHERE subject IS NOT NULL
+              AND TRIM(subject) <> ''
+        """)
+        existing_subjects = cursor.fetchall()
+        for index, row in enumerate(existing_subjects, 1):
+            subject_name = row[0].upper()
+            cursor.execute("""
+                SELECT id
+                FROM subjects
+                WHERE UPPER(subject_name) = UPPER(?)
+            """, (subject_name,))
+            found = cursor.fetchone()
+            if found:
+                subject_id = found[0]
+            else:
+                base_code = "".join(
+                    ch for ch in subject_name.upper()
+                    if ch.isalnum()
+                )[:12]
+                if not base_code:
+                    base_code = "SUBJECT"
+                subject_code = base_code
+                counter = 1
+                while True:
+                    try:
+                        cursor.execute(
+                            "INSERT INTO subjects(subject_code, subject_name) VALUES (?, ?)",
+                            (subject_code, subject_name)
+                        )
+                        subject_id = cursor.lastrowid
+                        break
+                    except sqlite3.IntegrityError:
+                        counter += 1
+                        subject_code = base_code[:9] + str(counter)
+            cursor.execute("""
+                UPDATE schedules
+                SET subject_code = (
+                    SELECT subject_code
+                    FROM subjects
+                    WHERE id = ?
+                )
+                WHERE UPPER(TRIM(subject)) = UPPER(TRIM(?))
+                  AND (subject_code IS NULL OR TRIM(subject_code) = '')
+            """, (subject_id, subject_name))
+    except Exception:
+        pass
+
+    connection.commit()
+    connection.close()
+
+
+_original_create_database = _base_create_database
+
+def create_database():
+    _original_create_database()
+    _ensure_attendx_upgrade_schema()
+
+
+# ============================================================
+# VALIDATION / NAME HELPERS
+# ============================================================
+
+def _normalize_text(value):
+    return " ".join(str(value or "").strip().split())
+
+
+def _valid_name(value, required=False):
+    value = _normalize_text(value)
+    if not value:
+        return not required
+    if len(value) > 80:
+        return False
+    if not any(ch.isalpha() for ch in value):
+        return False
+    for ch in value:
+        if ch not in NAME_ALLOWED_CHARACTERS:
+            return False
+    return True
+
+
+def _build_display_name(first_name, last_name, middle_name="", suffix=""):
+    parts = [
+        _normalize_text(first_name),
+        _normalize_text(middle_name),
+        _normalize_text(last_name),
+        _normalize_text(suffix)
+    ]
+    return " ".join(part for part in parts if part)
+
+
+def _valid_school_id(value):
+    import re
+    return re.fullmatch(r"\d{4}-\d{3}", value.strip()) is not None
+
+
+def _get_course_values():
+    connection = get_connection()
+    cursor = connection.cursor()
+    values = set()
+    try:
+        cursor.execute("SELECT course FROM students")
+        values.update(
+            str(row[0]).strip().upper()
+            for row in cursor.fetchall()
+            if row[0] and str(row[0]).strip()
+        )
+        cursor.execute("SELECT course FROM schedules")
+        values.update(
+            str(row[0]).strip().upper()
+            for row in cursor.fetchall()
+            if row[0] and str(row[0]).strip()
+        )
+    except Exception:
+        pass
+    finally:
+        connection.close()
+
+    # Keep the existing AttendX course usable on a fresh database
+    # while still using a controlled selection.
+    if not values:
+        values.add("BSIT")
+
+    return sorted(values)
+
+
+def _get_section_values(course=None, year=None):
+    connection = get_connection()
+    cursor = connection.cursor()
+    values = set()
+    try:
+        if course and year:
+            cursor.execute("""
+                SELECT section FROM students
+                WHERE UPPER(TRIM(course)) = UPPER(TRIM(?))
+                  AND UPPER(TRIM(year)) = UPPER(TRIM(?))
+                UNION
+                SELECT section FROM schedules
+                WHERE UPPER(TRIM(course)) = UPPER(TRIM(?))
+                  AND UPPER(TRIM(year)) = UPPER(TRIM(?))
+            """, (course, year, course, year))
+        else:
+            cursor.execute("SELECT section FROM students UNION SELECT section FROM schedules")
+        values.update(
+            str(row[0]).strip().upper()
+            for row in cursor.fetchall()
+            if row[0] and str(row[0]).strip()
+        )
+    except Exception:
+        pass
+    finally:
+        connection.close()
+
+    # AttendX sections are controlled A-Z values. Existing
+    # database values are preserved and added to the choices.
+    for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+        values.add(letter)
+
+    return sorted(values)
+
+
+def _make_combo(parent, values, default=None, width=None):
+    kwargs = {
+        "values": values,
+        "height": 44,
+        "corner_radius": 8,
+        "fg_color": CARD_2,
+        "border_color": BORDER,
+        "button_color": PURPLE,
+        "button_hover_color": PURPLE_HOVER,
+        "text_color": WHITE
+    }
+    if width:
+        kwargs["width"] = width
+    combo = ctk.CTkComboBox(parent, **kwargs)
+    if values:
+        combo.set(default if default in values else values[0])
+    return combo
+
+
+# ============================================================
+# STUDENT REGISTRATION — FOUR-PART NAME STRUCTURE
+# ============================================================
+
+def student_register_page(app):
+    clear_screen(app)
+    create_top_bar(app, app, True, lambda: student_portal(app))
+    create_page_title(
+        app,
+        "CREATE STUDENT ACCOUNT",
+        "Use the student's official information."
+    )
+
+    form = ctk.CTkScrollableFrame(
+        app,
+        width=650,
+        height=610,
+        fg_color=CARD,
+        corner_radius=18,
+        border_width=1,
+        border_color=BORDER
+    )
+    form.pack(fill="both", expand=True, padx=80, pady=(5, 20))
+
+    ctk.CTkLabel(
+        form, text="Student Registration",
+        font=("Arial", 22, "bold"), text_color=WHITE
+    ).pack(pady=(20, 12))
+
+    school_id = create_input(form, "Student ID / School ID  (YYYY-###)")
+    first_name = create_input(form, "First Name *")
+    last_name = create_input(form, "Last Name *")
+    middle_name = create_input(form, "Middle Name (Optional)")
+    suffix = create_input(form, "Extension / Suffix (Optional)")
+
+    ctk.CTkLabel(
+        form, text="Sex", font=("Arial", 10, "bold"),
+        text_color=MUTED
+    ).pack(anchor="w", padx=2, pady=(7, 0))
+    sex = _make_combo(form, ["Male", "Female"], "Male")
+    sex.pack(fill="x", pady=6)
+
+    ctk.CTkLabel(
+        form, text="Course", font=("Arial", 10, "bold"),
+        text_color=MUTED
+    ).pack(anchor="w", padx=2, pady=(7, 0))
+    course = _make_combo(form, _get_course_values())
+    course.pack(fill="x", pady=6)
+
+    ctk.CTkLabel(
+        form, text="Year", font=("Arial", 10, "bold"),
+        text_color=MUTED
+    ).pack(anchor="w", padx=2, pady=(7, 0))
+    year = _make_combo(form, ["1ST", "2ND", "3RD", "4TH"], "1ST")
+    year.pack(fill="x", pady=6)
+
+    ctk.CTkLabel(
+        form, text="Section", font=("Arial", 10, "bold"),
+        text_color=MUTED
+    ).pack(anchor="w", padx=2, pady=(7, 0))
+    section = _make_combo(
+        form,
+        _get_section_values(course.get(), year.get()),
+        "A"
+    )
+    section.pack(fill="x", pady=6)
+
+    def refresh_sections(_value=None):
+        values = _get_section_values(course.get(), year.get())
+        section.configure(values=values)
+        if section.get() not in values:
+            section.set(values[0])
+
+    course.configure(command=refresh_sections)
+    year.configure(command=refresh_sections)
+
+    password = create_input(form, "Password", show="*")
+    confirm = create_input(form, "Confirm Password", show="*")
+
+    def register():
+        sid = _normalize_text(school_id.get())
+        first = _normalize_text(first_name.get())
+        last = _normalize_text(last_name.get())
+        middle = _normalize_text(middle_name.get())
+        extension = _normalize_text(suffix.get())
+        sex_value = _normalize_text(sex.get()).title()
+        course_value = _normalize_text(course.get()).upper()
+        year_value = _normalize_text(year.get()).upper()
+        section_value = _normalize_text(section.get()).upper()
+        pass_value = password.get()
+        confirm_value = confirm.get()
+
+        if not sid or not first or not last or not course_value or not year_value or not section_value:
+            messagebox.showerror("Registration Error", "Please complete all required fields.")
+            return
+
+        if not _valid_school_id(sid):
+            messagebox.showerror(
+                "Registration Error",
+                "Student ID must use the format YYYY-###."
+            )
+            return
+
+        if not _valid_name(first, True) or not _valid_name(last, True):
+            messagebox.showerror(
+                "Registration Error",
+                "First Name and Last Name must contain valid name values."
+            )
+            return
+
+        if not _valid_name(middle) or not _valid_name(extension):
+            messagebox.showerror(
+                "Registration Error",
+                "Middle Name or Extension/Suffix contains invalid characters."
+            )
+            return
+
+        if sex_value not in ("Male", "Female"):
+            messagebox.showerror(
+                "Registration Error",
+                "Sex must be Male or Female."
+            )
+            return
+
+        if len(pass_value) < 6:
+            messagebox.showerror(
+                "Registration Error",
+                "Password must contain at least 6 characters."
+            )
+            return
+
+        if pass_value != confirm_value:
+            messagebox.showerror(
+                "Registration Error",
+                "Passwords do not match."
+            )
+            return
+
+        display_name = _build_display_name(first, last, middle, extension)
+
+        connection = get_connection()
+        try:
+            connection.execute("""
+                INSERT INTO students
+                (
+                    school_id, password, name,
+                    course, year, section,
+                    first_name, last_name, middle_name, suffix, sex, status
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE')
+            """, (
+                sid,
+                hash_password(pass_value),
+                display_name,
+                course_value,
+                year_value,
+                section_value,
+                first,
+                last,
+                middle,
+                extension,
+                sex_value
+            ))
+            connection.commit()
+            messagebox.showinfo(
+                "Account Created",
+                "Student account successfully created.\n\nHi "
+                + display_name + "! Your AttendX account is ready."
+            )
+            student_login_page(app)
+        except sqlite3.IntegrityError:
+            messagebox.showerror(
+                "Registration Error",
+                "School ID already exists. Please use another School ID."
+            )
+        except Exception as error:
+            connection.rollback()
+            messagebox.showerror(
+                "Registration Error",
+                "Unable to create the student account.\n\n" + str(error)
+            )
+        finally:
+            connection.close()
+
+    create_button(form, "CREATE ACCOUNT", register, width=300).pack(pady=(15, 8))
+    create_button(
+        form, "BACK", lambda: student_portal(app), width=300,
+        fg_color="#242B40", hover_color="#323B55"
+    ).pack(pady=(0, 20))
+
+
+# ============================================================
+# TEACHER / TC REGISTRATION
+# ============================================================
+
+def teacher_register_page(app, account_role="TEACHER"):
+    clear_screen(app)
+    create_top_bar(app, app, True, lambda: teacher_portal(app))
+    role_value = "TC" if str(account_role).upper() == "TC" else "TEACHER"
+
+    form = ctk.CTkScrollableFrame(
+        app,
+        width=650,
+        height=610,
+        fg_color=CARD,
+        corner_radius=18,
+        border_width=1,
+        border_color=BORDER
+    )
+    form.pack(fill="both", expand=True, padx=80, pady=(5, 20))
+
+    create_page_title(
+        app,
+        "CREATE " + role_value + " ACCOUNT",
+        "Enter the official " + role_value + " information."
+    )
+
+    ctk.CTkLabel(
+        form, text=role_value + " Registration",
+        font=("Arial", 22, "bold"), text_color=WHITE
+    ).pack(pady=(20, 12))
+
+    teacher_id = create_input(
+        form,
+        ("TC ID" if role_value == "TC" else "Teacher ID")
+    )
+    first_name = create_input(form, "First Name *")
+    last_name = create_input(form, "Last Name *")
+    middle_name = create_input(form, "Middle Name (Optional)")
+    suffix = create_input(form, "Extension / Suffix (Optional)")
+    password = create_input(form, "Password", show="*")
+    confirm = create_input(form, "Confirm Password", show="*")
+
+    def register():
+        tid = _normalize_text(teacher_id.get())
+        first = _normalize_text(first_name.get())
+        last = _normalize_text(last_name.get())
+        middle = _normalize_text(middle_name.get())
+        extension = _normalize_text(suffix.get())
+        pass_value = password.get()
+        confirm_value = confirm.get()
+
+        if not tid or not first or not last:
+            messagebox.showerror(
+                "Registration Error",
+                "Teacher/TC ID, First Name and Last Name are required."
+            )
+            return
+
+        if not _valid_name(first, True) or not _valid_name(last, True):
+            messagebox.showerror(
+                "Registration Error",
+                "First Name and Last Name must contain valid name values."
+            )
+            return
+
+        if not _valid_name(middle) or not _valid_name(extension):
+            messagebox.showerror(
+                "Registration Error",
+                "Middle Name or Extension/Suffix contains invalid characters."
+            )
+            return
+
+        if len(pass_value) < 6:
+            messagebox.showerror(
+                "Registration Error",
+                "Password must contain at least 6 characters."
+            )
+            return
+
+        if pass_value != confirm_value:
+            messagebox.showerror(
+                "Registration Error",
+                "Passwords do not match."
+            )
+            return
+
+        display_name = _build_display_name(first, last, middle, extension)
+
+        connection = get_connection()
+        try:
+            connection.execute("""
+                INSERT INTO teachers
+                (
+                    teacher_id, password, name,
+                    first_name, last_name, middle_name, suffix,
+                    role, status
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE')
+            """, (
+                tid,
+                hash_password(pass_value),
+                display_name,
+                first,
+                last,
+                middle,
+                extension,
+                role_value
+            ))
+            connection.commit()
+            messagebox.showinfo(
+                "Account Created",
+                role_value + " account successfully created.\n\nHi "
+                + display_name + "! Your AttendX account is ready."
+            )
+            teacher_login_page(app, role_value)
+        except sqlite3.IntegrityError:
+            messagebox.showerror(
+                "Registration Error",
+                "ID already exists. Please use another ID."
+            )
+        except Exception as error:
+            connection.rollback()
+            messagebox.showerror(
+                "Registration Error",
+                "Unable to create the account.\n\n" + str(error)
+            )
+        finally:
+            connection.close()
+
+    create_button(form, "CREATE ACCOUNT", register, width=300).pack(pady=(15, 8))
+    create_button(
+        form, "BACK", lambda: teacher_portal(app), width=300,
+        fg_color="#242B40", hover_color="#323B55"
+    ).pack(pady=(0, 20))
+
+
+# ============================================================
+# TEACHER / TC LOGIN
+# ============================================================
+
+def teacher_login_page(app, forced_role=None):
+    clear_screen(app)
+    role_filter = str(forced_role or "").upper().strip()
+
+    create_top_bar(
+        app, app, True,
+        lambda: role_selection(app)
+    )
+
+    title = "TC LOGIN" if role_filter == "TC" else "TEACHER LOGIN"
+    create_page_title(
+        app,
+        title,
+        "Login using your " + ("TC ID" if role_filter == "TC" else "Teacher ID") + " and password."
+    )
+
+    form = ctk.CTkFrame(
+        app, width=500, height=430, fg_color=CARD,
+        corner_radius=18, border_width=1, border_color=BORDER
+    )
+    form.pack(expand=True)
+    form.pack_propagate(False)
+
+    ctk.CTkLabel(
+        form, text="Welcome Back",
+        font=("Arial", 24, "bold"), text_color=WHITE
+    ).pack(pady=(30, 15))
+
+    account_id = create_input(
+        form,
+        "TC ID" if role_filter == "TC" else "Teacher ID"
+    )
+    password = create_input(form, "Password", show="*")
+
+    def login():
+        tid = _normalize_text(account_id.get())
+        pass_value = password.get()
+
+        if not tid or not pass_value:
+            messagebox.showerror(
+                "Login Error",
+                "Please enter your ID and password."
+            )
+            return
+
+        connection = get_connection()
+        cursor = connection.cursor()
+        try:
+            if _column_exists("teachers", "role"):
+                cursor.execute("""
+                    SELECT id, teacher_id, name, role, status
+                    FROM teachers
+                    WHERE teacher_id = ? AND password = ?
+                """, (tid, hash_password(pass_value)))
+                row = cursor.fetchone()
+            else:
+                cursor.execute("""
+                    SELECT id, teacher_id, name, 'TEACHER', 'ACTIVE'
+                    FROM teachers
+                    WHERE teacher_id = ? AND password = ?
+                """, (tid, hash_password(pass_value)))
+                row = cursor.fetchone()
+        finally:
+            connection.close()
+
+        if not row:
+            messagebox.showerror("Login Failed", "Invalid ID or password.")
+            return
+
+        actual_role = str(row[3] or "TEACHER").upper()
+        status = str(row[4] or "ACTIVE").upper()
+
+        if status != "ACTIVE":
+            messagebox.showerror(
+                "Login Blocked",
+                "This account is currently inactive."
+            )
+            return
+
+        if role_filter and actual_role != role_filter:
+            messagebox.showerror(
+                "Role Mismatch",
+                "This account is registered as " + actual_role + "."
+            )
+            return
+
+        global CURRENT_USER_NAME, CURRENT_USER_ROLE
+        CURRENT_USER_NAME = row[2]
+        CURRENT_USER_ROLE = actual_role.lower()
+
+        teacher_record = (row[0], row[1], row[2])
+
+        if actual_role == "TC":
+            tc_dashboard(app, teacher_record)
+        else:
+            teacher_dashboard(app, teacher_record)
+
+    create_button(form, "LOG IN", login, width=300).pack(pady=(15, 8))
+    create_button(
+        form, "CREATE ACCOUNT",
+        lambda: teacher_register_page(
+            app,
+            "TC" if role_filter == "TC" else "TEACHER"
+        ),
+        width=300
+    ).pack(pady=8)
+    create_button(
+        form, "FORGOT PASSWORD",
+        lambda: teacher_forgot_password(app),
+        width=300,
+        fg_color="#242B40",
+        hover_color="#323B55"
+    ).pack(pady=8)
+
+
+# ============================================================
+# ROLE SELECTION — STUDENT / TEACHER / TC
+# ============================================================
+
+def role_selection(app):
+    global CURRENT_USER_NAME, CURRENT_USER_ROLE
+    CURRENT_USER_NAME = ""
+    CURRENT_USER_ROLE = ""
+    clear_screen(app)
+    create_top_bar(app, app)
+
+    ctk.CTkLabel(
+        app,
+        text="WELCOME TO ATTENDX",
+        font=("Arial", 34, "bold"),
+        text_color=WHITE
+    ).pack(pady=(30, 4))
+
+    ctk.CTkLabel(
+        app,
+        text="Smart School Attendance Management System",
+        font=("Arial", 14),
+        text_color=MUTED
+    ).pack(pady=(0, 25))
+
+    cards = ctk.CTkFrame(app, fg_color="transparent")
+    cards.pack(expand=True)
+
+    roles = [
+        (
+            "STUDENT",
+            "Manage subjects, profile and attendance.",
+            lambda: student_portal(app)
+        ),
+        (
+            "TEACHER",
+            "Manage schedules, students and attendance.",
+            lambda: teacher_portal(app)
+        ),
+        (
+            "TC",
+            "Teacher Coordinator access for classes, verification and management.",
+            lambda: teacher_login_page(app, "TC")
+        )
+    ]
+
+    for title, description, command in roles:
+        card = ctk.CTkFrame(
+            cards, width=300, height=300, fg_color=CARD,
+            corner_radius=18, border_width=1, border_color=BORDER
+        )
+        card.pack(side="left", padx=10)
+        card.pack_propagate(False)
+
+        ctk.CTkLabel(
+            card, text=title,
+            font=("Arial", 24, "bold"), text_color=WHITE
+        ).pack(pady=(38, 12))
+
+        ctk.CTkLabel(
+            card, text=description,
+            font=("Arial", 11), text_color=TEXT,
+            justify="center", wraplength=245
+        ).pack(pady=5)
+
+        create_button(
+            card,
+            "ENTER " + title + " PORTAL",
+            command,
+            width=230
+        ).pack(pady=25)
+
+    bottom = ctk.CTkFrame(app, fg_color="transparent")
+    bottom.pack(pady=(0, 20))
+    create_button(
+        bottom, "USER GUIDE", lambda: show_user_guide(app),
+        width=160, height=38, fg_color=CARD, hover_color=CARD_2
+    ).pack(side="left", padx=5)
+    create_button(
+        bottom, "EXIT SYSTEM", app.destroy,
+        width=160, height=38, fg_color="#242B40", hover_color="#323B55"
+    ).pack(side="left", padx=5)
+
+
+# ============================================================
+# STUDENT DASHBOARD — ABSENCE / DROP STATUS
+# ============================================================
+
+def _get_student_absence_count(student_id):
+    connection = get_connection()
+    cursor = connection.cursor()
+    try:
+        cursor.execute("""
+            SELECT COUNT(*)
+            FROM attendance
+            WHERE student_id = ?
+              AND UPPER(status) = 'ABSENT'
+        """, (student_id,))
+        return int(cursor.fetchone()[0] or 0)
+    except Exception:
+        return 0
+    finally:
+        connection.close()
+
+
+def student_dashboard(app, student):
+    clear_screen(app)
+    create_top_bar(app, app)
+
+    absence_count = _get_student_absence_count(student[0])
+    drop_flag = absence_count >= 3
+
+    welcome = ctk.CTkFrame(app, fg_color="transparent")
+    welcome.pack(fill="x", padx=50, pady=(18, 0))
+
+    ctk.CTkLabel(
+        welcome,
+        text="HI, " + str(student[2]).upper() + "! 👋",
+        font=("Arial", 20, "bold"), text_color=WHITE
+    ).pack(anchor="w")
+
+    ctk.CTkLabel(
+        welcome,
+        text="You're back. Here's your AttendX student account.",
+        font=("Arial", 11), text_color=MUTED
+    ).pack(anchor="w", pady=(2, 0))
+
+    profile = ctk.CTkFrame(
+        app, fg_color=CARD, height=180, corner_radius=15,
+        border_width=1, border_color=ERROR if drop_flag else BORDER
+    )
+    profile.pack(fill="x", padx=50, pady=(20, 15))
+    profile.pack_propagate(False)
+
+    left = ctk.CTkFrame(profile, fg_color="transparent")
+    left.pack(side="left", padx=30, pady=20)
+
+    ctk.CTkLabel(
+        left, text=student[2],
+        font=("Arial", 25, "bold"), text_color=WHITE
+    ).pack(anchor="w")
+
+    ctk.CTkLabel(
+        left, text="Student ID: " + student[1],
+        font=("Arial", 11), text_color=MUTED
+    ).pack(anchor="w", pady=4)
+
+    ctk.CTkLabel(
+        left,
+        text=str(student[3]) + "  •  " + str(student[4]) + " Year  •  Section " + str(student[5]),
+        font=("Arial", 12), text_color=TEXT
+    ).pack(anchor="w")
+
+    status_text = "FLAG FOR DROP" if drop_flag else "ACTIVE"
+    status_color = ERROR if drop_flag else SUCCESS
+
+    ctk.CTkLabel(
+        left,
+        text="ABSENCES: " + str(absence_count) + " / 3",
+        font=("Arial", 12, "bold"), text_color=status_color
+    ).pack(anchor="w", pady=(5, 0))
+
+    ctk.CTkLabel(
+        left,
+        text=status_text,
+        font=("Arial", 12, "bold"), text_color=status_color
+    ).pack(anchor="w", pady=(2, 0))
+
+    profile_right = ctk.CTkFrame(profile, fg_color="transparent")
+    profile_right.pack(side="right", padx=25, pady=15)
+    create_live_datetime(profile_right).pack(anchor="e")
+    ctk.CTkLabel(
+        profile_right, text="STUDENT",
+        font=("Arial", 11, "bold"), text_color=PURPLE
+    ).pack(anchor="e", pady=(5, 0))
+
+    menu = ctk.CTkFrame(app, fg_color="transparent")
+    menu.pack(expand=True)
+
+    buttons = [
+        ("ADD MY SUBJECT", "Connect yourself to a class using your teacher information.",
+         lambda: student_add_subject_page(app, student)),
+        ("MY SUBJECTS", "View your currently enrolled classes.",
+         lambda: student_my_subjects_page(app, student)),
+        ("MY ATTENDANCE", "View your attendance history and status.",
+         lambda: student_attendance_page(app, student)),
+        ("MY PROFILE", "View your information and class QR codes.",
+         lambda: student_profile_page(app, student))
+    ]
+
+    for title, description, command in buttons:
+        card = ctk.CTkFrame(
+            menu, width=800, height=75, fg_color=CARD,
+            corner_radius=12, border_width=1, border_color=BORDER
+        )
+        card.pack(pady=6)
+        card.pack_propagate(False)
+        create_button(card, title, command, width=190).pack(
+            side="left", padx=15, pady=16
+        )
+        ctk.CTkLabel(
+            card, text=description,
+            font=("Arial", 11), text_color=TEXT
+        ).pack(side="left", padx=10)
+
+    create_button(
+        app, "LOG OUT", lambda: role_selection(app),
+        width=180, fg_color="#242B40", hover_color="#323B55"
+    ).pack(pady=(5, 25))
+
+
+# ============================================================
+# CENTRAL SUBJECT MANAGEMENT
+# ============================================================
+
+def subject_management_page(app, teacher):
+    clear_screen(app)
+    create_top_bar(
+        app, app, True,
+        lambda: tc_dashboard(app, teacher) if CURRENT_USER_ROLE == "tc"
+        else teacher_dashboard(app, teacher)
+    )
+    create_page_title(
+        app, "SUBJECTS",
+        "Centralized Subject Code and Subject Name management."
+    )
+
+    shell = ctk.CTkFrame(app, fg_color="transparent")
+    shell.pack(fill="both", expand=True, padx=55, pady=5)
+
+    form = ctk.CTkFrame(
+        shell, fg_color=CARD, corner_radius=15,
+        border_width=1, border_color=BORDER
+    )
+    form.pack(fill="x", pady=(0, 10))
+
+    code_entry = create_input(form, "Subject Code")
+    name_entry = create_input(form, "Subject Name")
+
+    list_frame = ctk.CTkScrollableFrame(
+        shell, fg_color="transparent"
+    )
+    list_frame.pack(fill="both", expand=True)
+
+    def load_subjects():
+        for widget in list_frame.winfo_children():
+            widget.destroy()
+
+        connection = get_connection()
+        cursor = connection.cursor()
+        cursor.execute("""
+            SELECT id, subject_code, subject_name, status
+            FROM subjects
+            ORDER BY subject_code
+        """)
+        rows = cursor.fetchall()
+        connection.close()
+
+        if not rows:
+            ctk.CTkLabel(
+                list_frame, text="No subjects registered.",
+                font=("Arial", 14), text_color=MUTED
+            ).pack(pady=40)
+            return
+
+        for row in rows:
+            card = ctk.CTkFrame(
+                list_frame, fg_color=CARD, corner_radius=12,
+                border_width=1, border_color=BORDER
+            )
+            card.pack(fill="x", pady=5)
+            ctk.CTkLabel(
+                card, text=row[1] + "  |  " + row[2],
+                font=("Arial", 13, "bold"), text_color=WHITE
+            ).pack(side="left", padx=16, pady=12)
+            ctk.CTkLabel(
+                card, text=row[3],
+                font=("Arial", 10, "bold"),
+                text_color=SUCCESS if row[3] == "ACTIVE" else WARNING
+            ).pack(side="right", padx=16)
+
+    def add_subject():
+        code = _normalize_text(code_entry.get()).upper()
+        name = _normalize_text(name_entry.get()).upper()
+
+        if not code or not name:
+            messagebox.showerror("Subject Error", "Subject Code and Subject Name are required.")
+            return
+        if len(code) > 30 or len(name) > 120:
+            messagebox.showerror("Subject Error", "Subject Code or Name is too long.")
+            return
+
+        connection = get_connection()
+        try:
+            connection.execute("""
+                INSERT INTO subjects(subject_code, subject_name)
+                VALUES (?, ?)
+            """, (code, name))
+            connection.commit()
+            code_entry.delete(0, "end")
+            name_entry.delete(0, "end")
+            load_subjects()
+        except sqlite3.IntegrityError:
+            messagebox.showerror(
+                "Subject Error",
+                "Subject Code already exists."
+            )
+        finally:
+            connection.close()
+
+    create_button(
+        form, "ADD SUBJECT", add_subject, width=200
+    ).pack(pady=(0, 15))
+    load_subjects()
+
+
+# ============================================================
+# CLASS / SECTION MANAGEMENT
+# ============================================================
+
+def class_management_page(app, teacher):
+    clear_screen(app)
+    create_top_bar(
+        app, app, True,
+        lambda: tc_dashboard(app, teacher) if CURRENT_USER_ROLE == "tc"
+        else teacher_dashboard(app, teacher)
+    )
+    create_page_title(
+        app, "CLASSES / SECTIONS",
+        "Review Course, Year, Section, Subject and Teacher/TC assignments."
+    )
+
+    search = create_input(app, "Search ID, Course, Year, Section or Subject")
+    search.pack(fill="x", padx=55, pady=(0, 8))
+
+    container = ctk.CTkScrollableFrame(app, fg_color="transparent")
+    container.pack(fill="both", expand=True, padx=55, pady=5)
+
+    def load():
+        for widget in container.winfo_children():
+            widget.destroy()
+
+        query = _normalize_text(search.get()).upper()
+
+        connection = get_connection()
+        cursor = connection.cursor()
+        cursor.execute("""
+            SELECT
+                schedules.id,
+                schedules.course,
+                schedules.year,
+                schedules.section,
+                schedules.subject,
+                schedules.day,
+                schedules.start_time,
+                schedules.end_time,
+                teachers.name,
+                teachers.teacher_id,
+                COALESCE(teachers.role, 'TEACHER')
+            FROM schedules
+            INNER JOIN teachers ON schedules.teacher_id = teachers.id
+            ORDER BY schedules.course, schedules.year, schedules.section,
+                     schedules.subject, schedules.day, schedules.start_time
+        """)
+        rows = cursor.fetchall()
+        connection.close()
+
+        rows = [
+            row for row in rows
+            if not query or query in " ".join(str(x).upper() for x in row)
+        ]
+
+        if not rows:
+            ctk.CTkLabel(
+                container, text="No matching classes found.",
+                font=("Arial", 14), text_color=MUTED
+            ).pack(pady=50)
+            return
+
+        for row in rows:
+            card = ctk.CTkFrame(
+                container, fg_color=CARD, corner_radius=12,
+                border_width=1, border_color=BORDER
+            )
+            card.pack(fill="x", pady=5)
+
+            ctk.CTkLabel(
+                card,
+                text=row[4] + "  |  " + row[1] + " | " + row[2] + " | Section " + row[3],
+                font=("Arial", 13, "bold"), text_color=WHITE
+            ).pack(anchor="w", padx=16, pady=(12, 4))
+
+            ctk.CTkLabel(
+                card,
+                text=(
+                    row[5] + "  " + format_time_12h(row[6])
+                    + " - " + format_time_12h(row[7])
+                    + "  |  " + row[10] + ": " + row[8]
+                    + "  |  ID: " + row[9]
+                ),
+                font=("Arial", 10), text_color=TEXT
+            ).pack(anchor="w", padx=16, pady=(0, 12))
+
+    create_button(
+        app, "SEARCH / REFRESH", load, width=180, height=38
+    ).pack(pady=(0, 8))
+    load()
+
+
+# ============================================================
+# STUDENT MANAGEMENT
+# ============================================================
+
+def student_management_page(app, teacher):
+    clear_screen(app)
+    create_top_bar(
+        app, app, True,
+        lambda: tc_dashboard(app, teacher) if CURRENT_USER_ROLE == "tc"
+        else teacher_dashboard(app, teacher)
+    )
+    create_page_title(
+        app, "STUDENTS",
+        "Search, view and activate/deactivate student accounts."
+    )
+
+    search = create_input(app, "Search ID, Name, Course, Year or Section")
+    search.pack(fill="x", padx=55, pady=(0, 8))
+    container = ctk.CTkScrollableFrame(app, fg_color="transparent")
+    container.pack(fill="both", expand=True, padx=55, pady=5)
+
+    def load():
+        for widget in container.winfo_children():
+            widget.destroy()
+
+        query = _normalize_text(search.get()).upper()
+        connection = get_connection()
+        cursor = connection.cursor()
+        cursor.execute("""
+            SELECT id, school_id, name, sex, course, year, section,
+                   COALESCE(status, 'ACTIVE')
+            FROM students
+            ORDER BY name
+        """)
+        rows = cursor.fetchall()
+        connection.close()
+
+        rows = [
+            row for row in rows
+            if not query or query in " ".join(str(x).upper() for x in row)
+        ]
+
+        for row in rows:
+            card = ctk.CTkFrame(
+                container, fg_color=CARD, corner_radius=12,
+                border_width=1, border_color=BORDER
+            )
+            card.pack(fill="x", pady=5)
+
+            ctk.CTkLabel(
+                card,
+                text=row[2] + "  |  " + row[1],
+                font=("Arial", 13, "bold"), text_color=WHITE
+            ).pack(side="left", padx=16, pady=12)
+
+            ctk.CTkLabel(
+                card,
+                text=(
+                    str(row[3] or "")
+                    + " | " + row[4]
+                    + " | " + row[5]
+                    + " | Section " + row[6]
+                ),
+                font=("Arial", 10), text_color=TEXT
+            ).pack(side="left", padx=10)
+
+            def toggle(student_id=row[0], current=row[7]):
+                new_status = "INACTIVE" if current == "ACTIVE" else "ACTIVE"
+                connection = get_connection()
+                connection.execute(
+                    "UPDATE students SET status = ? WHERE id = ?",
+                    (new_status, student_id)
+                )
+                connection.commit()
+                connection.close()
+                load()
+
+            create_button(
+                card,
+                row[7],
+                toggle,
+                width=105,
+                height=34,
+                fg_color=SUCCESS if row[7] == "ACTIVE" else WARNING,
+                hover_color=SUCCESS if row[7] == "ACTIVE" else WARNING
+            ).pack(side="right", padx=12)
+
+    create_button(
+        app, "SEARCH / REFRESH", load, width=180, height=38
+    ).pack(pady=(0, 8))
+    load()
+
+
+# ============================================================
+# TC MANAGEMENT
+# ============================================================
+
+def tc_management_page(app, teacher):
+    clear_screen(app)
+    create_top_bar(app, app, True, lambda: tc_dashboard(app, teacher))
+    create_page_title(
+        app, "TC MANAGEMENT",
+        "Manage Teacher Coordinator accounts."
+    )
+
+    search = create_input(app, "Search TC ID or Name")
+    search.pack(fill="x", padx=55, pady=(0, 8))
+    container = ctk.CTkScrollableFrame(app, fg_color="transparent")
+    container.pack(fill="both", expand=True, padx=55, pady=5)
+
+    def load():
+        for widget in container.winfo_children():
+            widget.destroy()
+
+        query = _normalize_text(search.get()).upper()
+        connection = get_connection()
+        cursor = connection.cursor()
+        cursor.execute("""
+            SELECT id, teacher_id, name, status
+            FROM teachers
+            WHERE UPPER(COALESCE(role, 'TEACHER')) = 'TC'
+            ORDER BY name
+        """)
+        rows = cursor.fetchall()
+        connection.close()
+
+        rows = [
+            row for row in rows
+            if not query or query in (str(row[1]) + " " + str(row[2])).upper()
+        ]
+
+        if not rows:
+            ctk.CTkLabel(
+                container, text="No TC accounts found.",
+                font=("Arial", 14), text_color=MUTED
+            ).pack(pady=40)
+            return
+
+        for row in rows:
+            card = ctk.CTkFrame(
+                container, fg_color=CARD, corner_radius=12,
+                border_width=1, border_color=BORDER
+            )
+            card.pack(fill="x", pady=5)
+
+            ctk.CTkLabel(
+                card, text=row[2] + "  |  " + row[1],
+                font=("Arial", 13, "bold"), text_color=WHITE
+            ).pack(side="left", padx=16, pady=12)
+
+            def toggle(tc_id=row[0], current=row[3]):
+                new_status = "INACTIVE" if str(current).upper() == "ACTIVE" else "ACTIVE"
+                connection = get_connection()
+                connection.execute(
+                    "UPDATE teachers SET status = ? WHERE id = ?",
+                    (new_status, tc_id)
+                )
+                connection.commit()
+                connection.close()
+                load()
+
+            create_button(
+                card, row[3], toggle, width=105, height=34,
+                fg_color=SUCCESS if str(row[3]).upper() == "ACTIVE" else WARNING,
+                hover_color=SUCCESS if str(row[3]).upper() == "ACTIVE" else WARNING
+            ).pack(side="right", padx=12)
+
+    create_button(
+        app, "SEARCH / REFRESH", load, width=180, height=38
+    ).pack(pady=(0, 8))
+    load()
+
+
+# ============================================================
+# TEACHER/TC FACE REGISTRATION
+# ============================================================
+
+def teacher_face_register_action(teacher):
+    try:
+        success = register_teacher_face(teacher[0])
+        if success:
+            messagebox.showinfo(
+                "FACE REGISTRATION",
+                "Teacher/TC face registration completed successfully."
+            )
+        else:
+            messagebox.showwarning(
+                "FACE REGISTRATION",
+                "Face registration was cancelled or could not be completed."
+            )
+    except Exception as error:
+        messagebox.showerror(
+            "FACE REGISTRATION ERROR",
+            "Unable to register the Teacher/TC face.\n\n" + str(error)
+        )
+
+
+# ============================================================
+# TC DASHBOARD
+# ============================================================
+
+def tc_dashboard(app, teacher):
+    clear_screen(app)
+    create_top_bar(app, app)
+
+    ctk.CTkLabel(
+        app, text="TC CONTROL CENTER",
+        font=("Arial", 29, "bold"), text_color=WHITE
+    ).pack(anchor="w", padx=50, pady=(25, 3))
+
+    ctk.CTkLabel(
+        app,
+        text="Welcome, " + str(teacher[2]) + ". TC access is active.",
+        font=("Arial", 12), text_color=MUTED
+    ).pack(anchor="w", padx=50)
+
+    grid = ctk.CTkFrame(app, fg_color="transparent")
+    grid.pack(fill="both", expand=True, padx=45, pady=20)
+
+    actions = [
+        ("DASHBOARD", lambda: tc_dashboard(app, teacher)),
+        ("STUDENTS", lambda: student_management_page(app, teacher)),
+        ("SUBJECTS", lambda: subject_management_page(app, teacher)),
+        ("CLASSES / SECTIONS", lambda: class_management_page(app, teacher)),
+        ("ADD SCHEDULE", lambda: teacher_add_schedule_page(app, teacher)),
+        ("SCHEDULES", lambda: teacher_my_schedule_page(app, teacher)),
+        ("ATTENDANCE", lambda: teacher_attendance_page(app, teacher)),
+        ("ATTENDANCE HISTORY", lambda: teacher_attendance_records_page(app, teacher)),
+        ("REPORTS", lambda: reports_page(app, teacher)),
+        ("BACKUP / RESTORE", lambda: backup_restore_page(app, teacher)),
+        ("TC MANAGEMENT", lambda: tc_management_page(app, teacher)),
+        ("REGISTER TC FACE", lambda: teacher_face_register_action(teacher)),
+        ("CHECK FINGERPRINT", lambda: fingerprint_status_page(app, teacher)),
+        ("LOG OUT", lambda: role_selection(app))
+    ]
+
+    for index, (title, command) in enumerate(actions):
+        card = ctk.CTkFrame(
+            grid, fg_color=CARD, corner_radius=13,
+            border_width=1, border_color=BORDER
+        )
+        row = index // 3
+        col = index % 3
+        card.grid(row=row, column=col, padx=7, pady=7, sticky="nsew")
+        ctk.CTkLabel(
+            card, text=title,
+            font=("Arial", 12, "bold"), text_color=WHITE
+        ).pack(pady=(20, 8))
+        create_button(
+            card, "OPEN", command, width=145, height=36
+        ).pack(pady=(0, 18))
+
+    for col in range(3):
+        grid.grid_columnconfigure(col, weight=1)
+    for row in range((len(actions) + 2) // 3):
+        grid.grid_rowconfigure(row, weight=1)
+
+
+# ============================================================
+# ATTENDANCE STATUS — 15-MINUTE RULE
+# ============================================================
+
+def get_attendance_status(start_time, current_time=None):
+    if current_time is None:
+        current_time = datetime.now().strftime("%H:%M:%S")
+
+    try:
+        start_parts = str(start_time).split(":")
+        current_parts = str(current_time).split(":")
+        start_minutes = int(start_parts[0]) * 60 + int(start_parts[1])
+        current_minutes = int(current_parts[0]) * 60 + int(current_parts[1])
+    except Exception:
+        return "ABSENT"
+
+    elapsed = current_minutes - start_minutes
+
+    if elapsed < 0:
+        return "LATE"
+
+    if elapsed < 15:
+        return "LATE"
+
+    return "ABSENT"
+
+
+# ============================================================
+# ATTENDANCE RECORDING — CENTRAL VALIDATION
+# ============================================================
+
+def record_attendance(student_id, schedule_id, method):
+    now = datetime.now()
+    attendance_date = now.strftime("%Y-%m-%d")
+    attendance_time = now.strftime("%H:%M:%S")
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT
+                students.id,
+                students.school_id,
+                students.name,
+                students.course,
+                students.year,
+                students.section,
+                COALESCE(students.status, 'ACTIVE'),
+                schedules.id,
+                schedules.teacher_id,
+                schedules.subject,
+                schedules.course,
+                schedules.year,
+                schedules.section,
+                schedules.start_time
+            FROM students
+            INNER JOIN student_classes
+                ON student_classes.student_id = students.id
+            INNER JOIN schedules
+                ON schedules.id = student_classes.schedule_id
+            WHERE students.id = ?
+              AND schedules.id = ?
+        """, (student_id, schedule_id))
+        record = cursor.fetchone()
+
+        if not record:
+            return False, "Student is not enrolled in this class."
+
+        if str(record[6]).upper() != "ACTIVE":
+            return False, "Student account is inactive."
+
+        if str(record[3]).strip().upper() != str(record[10]).strip().upper():
+            return False, "Course does not match."
+
+        if str(record[4]).strip().upper() != str(record[11]).strip().upper():
+            return False, "Year level does not match."
+
+        if str(record[5]).strip().upper() != str(record[12]).strip().upper():
+            return False, "Section does not match."
+
+        cursor.execute("""
+            SELECT id, attendance_time, status
+            FROM attendance
+            WHERE student_id = ?
+              AND schedule_id = ?
+              AND attendance_date = ?
+        """, (student_id, schedule_id, attendance_date))
+        existing = cursor.fetchone()
+
+        if existing:
+            return False, (
+                "Attendance already recorded.\n"
+                "Time: " + str(existing[1])
+                + "\nStatus: " + str(existing[2])
+            )
+
+        status = get_attendance_status(record[13], attendance_time)
+
+        cursor.execute("""
+            INSERT INTO attendance
+            (
+                student_id, schedule_id, attendance_date,
+                attendance_time, status, method
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            student_id, schedule_id, attendance_date,
+            attendance_time, status, str(method).upper()
+        ))
+        connection.commit()
+        return True, status
+
+    except sqlite3.IntegrityError:
+        connection.rollback()
+        return False, "Attendance already recorded for this student and class today."
+    except Exception as error:
+        connection.rollback()
+        return False, str(error)
+    finally:
+        connection.close()
+
+
+# ============================================================
+# CONTINUOUS QR ATTENDANCE
+# ============================================================
+
+def attendance_qr_page(app, teacher, selected_schedule):
+    schedule_id = selected_schedule[0]
+    schedule_subject = selected_schedule[1]
+    schedule_course = selected_schedule[2]
+    schedule_year = selected_schedule[3]
+    schedule_section = selected_schedule[4]
+    schedule_day = selected_schedule[5]
+    schedule_start = selected_schedule[6]
+    schedule_end = selected_schedule[7]
+
+    clear_screen(app)
+    create_top_bar(
+        app, app, True,
+        lambda: teacher_attendance_page(app, teacher)
+    )
+    create_page_title(
+        app, "QR ATTENDANCE",
+        "Continuous QR verification. The scanner stays open until you close it."
+    )
+
+    panel = ctk.CTkFrame(
+        app, fg_color=CARD, corner_radius=18,
+        border_width=1, border_color=BORDER
+    )
+    panel.pack(fill="both", expand=True, padx=55, pady=10)
+
+    ctk.CTkLabel(
+        panel,
+        text=(
+            schedule_subject + " | " + schedule_course
+            + " | " + schedule_year + " | Section " + schedule_section
+            + "\n" + schedule_day + " "
+            + format_time_12h(schedule_start)
+            + " - " + format_time_12h(schedule_end)
+        ),
+        font=("Arial", 12, "bold"), text_color=PURPLE,
+        justify="center"
+    ).pack(pady=(20, 10))
+
+    result_label = ctk.CTkLabel(
+        panel, text="READY — OPEN THE QR SCANNER",
+        font=("Arial", 18, "bold"), text_color=TEXT
+    )
+    result_label.pack(pady=8)
+
+    details_label = ctk.CTkLabel(
+        panel, text="No student verified yet.",
+        font=("Arial", 11), text_color=MUTED,
+        justify="center", wraplength=700
+    )
+    details_label.pack(pady=8)
+
+    token_entry = create_input(panel, "QR Token (manual fallback)")
+    token_entry.pack(fill="x", padx=100, pady=8)
+
+    def validate_token(token):
+        token = str(token or "").strip()
+        if not token:
+            return False, "NOT VERIFIED", "QR token is empty.", ERROR
+
+        connection = get_connection()
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                SELECT
+                    qr_codes.student_id,
+                    qr_codes.schedule_id,
+                    qr_codes.token,
+                    qr_codes.created_at,
+                    students.school_id,
+                    students.name,
+                    students.course,
+                    students.year,
+                    students.section,
+                    schedules.subject,
+                    schedules.teacher_id,
+                    teachers.name,
+                    schedules.start_time
+                FROM qr_codes
+                INNER JOIN students ON qr_codes.student_id = students.id
+                INNER JOIN schedules ON qr_codes.schedule_id = schedules.id
+                INNER JOIN teachers ON schedules.teacher_id = teachers.id
+                WHERE qr_codes.token = ?
+            """, (token,))
+            row = cursor.fetchone()
+        finally:
+            connection.close()
+
+        if not row:
+            return False, "NOT VERIFIED", "QR token not found.", ERROR
+
+        if row[1] != schedule_id:
+            return False, "NOT VERIFIED", "Wrong class QR.", ERROR
+
+        if row[10] != teacher[0]:
+            return False, "NOT VERIFIED", "Wrong teacher/TC.", ERROR
+
+        checks = [
+            (row[6], schedule_course, "Course mismatch."),
+            (row[7], schedule_year, "Year mismatch."),
+            (row[8], schedule_section, "Section mismatch."),
+            (row[9], schedule_subject, "Subject mismatch.")
+        ]
+        for actual, expected, message in checks:
+            if str(actual).strip().upper() != str(expected).strip().upper():
+                return False, "NOT VERIFIED", message, ERROR
+
+        # QR expiration is based on its stored creation time.
+        try:
+            created = datetime.strptime(
+                str(row[3]),
+                "%Y-%m-%d %H:%M:%S"
+            )
+            age_seconds = (datetime.now() - created).total_seconds()
+            if age_seconds > QR_EXPIRATION_HOURS * 3600:
+                return False, "NOT VERIFIED", "QR code has expired. Generate a new QR.", ERROR
+        except Exception:
+            # Old records without a parseable timestamp remain
+            # usable rather than being silently destroyed.
+            pass
+
+        connection = get_connection()
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                SELECT id
+                FROM student_classes
+                WHERE student_id = ?
+                  AND schedule_id = ?
+            """, (row[0], schedule_id))
+            enrolled = cursor.fetchone()
+        finally:
+            connection.close()
+
+        if not enrolled:
+            return False, "NOT VERIFIED", "Student is not enrolled in this class.", ERROR
+
+        success, status = record_attendance(
+            row[0], schedule_id, "QR"
+        )
+
+        if not success:
+            if str(status).lower().startswith("attendance already recorded"):
+                return False, "ALREADY VERIFIED", status, WARNING
+            return False, "NOT VERIFIED", status, ERROR
+
+        detail = (
+            "Student: " + str(row[5])
+            + "\nSchool ID: " + str(row[4])
+            + "\nCourse: " + str(row[6])
+            + " | Year: " + str(row[7])
+            + " | Section: " + str(row[8])
+            + "\nSubject: " + str(row[9])
+            + "\nStatus: " + str(status)
+            + " | Method: QR"
+        )
+        return True, "VERIFIED", detail, SUCCESS
+
+    def verify_manual():
+        token = token_entry.get().strip()
+        ok, title, detail, color = validate_token(token)
+        result_label.configure(text=title, text_color=color)
+        details_label.configure(text=detail, text_color=color)
+        if ok:
+            token_entry.delete(0, "end")
+
+    def scan_qr_camera():
+        try:
+            import cv2
+        except ImportError as error:
+            result_label.configure(text="NOT VERIFIED", text_color=ERROR)
+            details_label.configure(text="OpenCV is not installed.\n" + str(error), text_color=ERROR)
+            return
+
+        camera = cv2.VideoCapture(0)
+        if not camera.isOpened():
+            result_label.configure(text="NOT VERIFIED", text_color=ERROR)
+            details_label.configure(text="Camera unavailable.", text_color=ERROR)
+            return
+
+        detector = cv2.QRCodeDetector()
+        window_name = "AttendX QR Attendance — Continuous"
+        cv2.namedWindow(window_name)
+        cancel = {"value": False}
+        last_token = ""
+        last_scan_time = 0.0
+        overlay_text = "READY — SCAN STUDENT QR"
+        overlay_color = (0, 255, 0)
+        overlay_until = 0.0
+
+        def mouse(event, x, y, flags, param):
+            if event == cv2.EVENT_LBUTTONDOWN:
+                height, width = param
+                if width - 180 <= x <= width - 20 and height - 75 <= y <= height - 20:
+                    cancel["value"] = True
+
+        import time as _time
+
+        while True:
+            success, frame = camera.read()
+            if not success:
+                overlay_text = "CAMERA READ ERROR"
+                overlay_color = (0, 0, 255)
+                break
+
+            data, points, _ = detector.detectAndDecode(frame)
+            height, width = frame.shape[:2]
+
+            if points is not None:
+                points = points.astype(int)
+                for i in range(len(points[0])):
+                    pt1 = tuple(points[0][i])
+                    pt2 = tuple(points[0][(i + 1) % len(points[0])])
+                    cv2.line(frame, pt1, pt2, (0, 255, 0), 3)
+
+            now_seconds = _time.time()
+            if data:
+                token = data.strip()
+                if token and (token != last_token or now_seconds - last_scan_time > 2.5):
+                    last_token = token
+                    last_scan_time = now_seconds
+                    ok, title, detail, color = validate_token(token)
+                    overlay_text = title
+                    overlay_color = (
+                        (0, 255, 0) if color == SUCCESS
+                        else (0, 165, 255) if color == WARNING
+                        else (0, 0, 255)
+                    )
+                    result_label.configure(text=title, text_color=color)
+                    details_label.configure(text=detail, text_color=color)
+                    overlay_until = now_seconds + 2.0
+
+            cv2.putText(
+                frame, "CONTINUOUS QR ATTENDANCE",
+                (20, 38), cv2.FONT_HERSHEY_SIMPLEX, 0.72,
+                overlay_color if now_seconds < overlay_until else (0, 255, 0), 2
+            )
+            cv2.putText(
+                frame, overlay_text,
+                (20, 72), cv2.FONT_HERSHEY_SIMPLEX, 0.82,
+                overlay_color if now_seconds < overlay_until else (0, 255, 0), 2
+            )
+            cv2.putText(
+                frame, "SCAN NEXT STUDENT",
+                (20, 108), cv2.FONT_HERSHEY_SIMPLEX, 0.58,
+                (255, 255, 255), 2
+            )
+
+            cv2.rectangle(
+                frame,
+                (width - 180, height - 75),
+                (width - 20, height - 20),
+                (80, 80, 80), -1
+            )
+            cv2.putText(
+                frame, "CLOSE",
+                (width - 150, height - 38),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.60,
+                (255, 255, 255), 2
+            )
+            cv2.setMouseCallback(window_name, mouse, (height, width))
+            cv2.imshow(window_name, frame)
+
+            key = cv2.waitKey(1) & 0xFF
+            if cancel["value"] or key in (27, ord("q")):
+                break
+
+        camera.release()
+        cv2.destroyAllWindows()
+
+    create_button(
+        panel, "SCAN QR WITH CAMERA",
+        scan_qr_camera, width=260
+    ).pack(pady=10)
+    create_button(
+        panel, "VERIFY TOKEN",
+        verify_manual, width=260
+    ).pack(pady=10)
+    create_button(
+        panel, "BACK",
+        lambda: teacher_attendance_page(app, teacher),
+        width=260, fg_color="#242B40", hover_color="#323B55"
+    ).pack(pady=(5, 15))
+
+
+# ============================================================
+# CONTINUOUS FACE ATTENDANCE
+# ============================================================
+
+def face_attendance_action(app, teacher, selected_schedule):
+    try:
+        import cv2
+        import face_recognition
+    except ImportError as error:
+        messagebox.showerror(
+            "FACE ATTENDANCE",
+            "Required face-recognition packages are not installed.\n\n"
+            + str(error)
+        )
+        return
+
+    schedule_id = selected_schedule[0]
+    subject = selected_schedule[1]
+    course = selected_schedule[2]
+    year = selected_schedule[3]
+    section = selected_schedule[4]
+
+    clear_screen(app)
+    create_top_bar(
+        app, app, True,
+        lambda: teacher_attendance_page(app, teacher)
+    )
+    create_page_title(
+        app, "FACE ATTENDANCE",
+        "Continuous face verification. The camera remains open for multiple students."
+    )
+
+    panel = ctk.CTkFrame(
+        app, fg_color=CARD, corner_radius=18,
+        border_width=1, border_color=BORDER
+    )
+    panel.pack(fill="both", expand=True, padx=55, pady=10)
+
+    result_label = ctk.CTkLabel(
+        panel, text="READY — START FACE SCANNER",
+        font=("Arial", 18, "bold"), text_color=TEXT
+    )
+    result_label.pack(pady=(25, 8))
+
+    details_label = ctk.CTkLabel(
+        panel, text="No student verified yet.",
+        font=("Arial", 11), text_color=MUTED,
+        justify="center", wraplength=750
+    )
+    details_label.pack(pady=5)
+
+    def scan_face():
+        camera = cv2.VideoCapture(0)
+        if not camera.isOpened():
+            result_label.configure(text="NOT VERIFIED", text_color=ERROR)
+            details_label.configure(text="Camera unavailable.", text_color=ERROR)
+            return
+
+        window_name = "AttendX FACE Attendance — Continuous"
+        cv2.namedWindow(window_name)
+
+        import time as _time
+        last_student_id = None
+        last_scan_time = 0.0
+        frame_index = 0
+        overlay_text = "LOOK AT CAMERA"
+        overlay_color = (0, 255, 0)
+        overlay_until = 0.0
+        cancel = {"value": False}
+
+        def mouse(event, x, y, flags, param):
+            if event == cv2.EVENT_LBUTTONDOWN:
+                height, width = param
+                if width - 180 <= x <= width - 20 and height - 75 <= y <= height - 20:
+                    cancel["value"] = True
+
+        while True:
+            success, frame = camera.read()
+            if not success:
+                overlay_text = "CAMERA READ ERROR"
+                overlay_color = (0, 0, 255)
+                break
+
+            frame_index += 1
+            small = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
+            rgb_small = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
+
+            face_locations = []
+            face_encodings = []
+
+            if frame_index % 3 == 0:
+                face_locations = face_recognition.face_locations(
+                    rgb_small, model="hog"
+                )
+                if len(face_locations) == 1:
+                    face_encodings = face_recognition.face_encodings(
+                        rgb_small, face_locations
+                    )
+
+            for location in face_locations:
+                top, right, bottom, left = [int(v * 2) for v in location]
+                cv2.rectangle(
+                    frame, (left, top), (right, bottom),
+                    (0, 255, 0), 2
+                )
+
+            now_seconds = _time.time()
+
+            if len(face_locations) > 1:
+                overlay_text = "ONLY ONE FACE ALLOWED"
+                overlay_color = (0, 0, 255)
+
+            elif len(face_locations) == 0:
+                overlay_text = "LOOK AT CAMERA"
+                overlay_color = (255, 200, 0)
+
+            elif len(face_encodings) == 1:
+                result = find_student_by_face(face_encodings[0])
+
+                if not result.get("found"):
+                    overlay_text = "NOT VERIFIED"
+                    overlay_color = (0, 0, 255)
+                    details = result.get(
+                        "message",
+                        "Face not recognized."
+                    )
+                    result_label.configure(
+                        text="NOT VERIFIED", text_color=ERROR
+                    )
+                    details_label.configure(
+                        text=details, text_color=ERROR
+                    )
+                    overlay_until = now_seconds + 1.5
+                else:
+                    student_id = result.get("student_id")
+                    distance = result.get("distance")
+
+                    if (
+                        student_id != last_student_id
+                        or now_seconds - last_scan_time > 3.0
+                    ):
+                        last_student_id = student_id
+                        last_scan_time = now_seconds
+
+                        success_record, attendance_result = record_attendance(
+                            student_id,
+                            schedule_id,
+                            "FACE"
+                        )
+
+                        connection = get_connection()
+                        cursor = connection.cursor()
+                        cursor.execute("""
+                            SELECT school_id, name, course, year, section
+                            FROM students
+                            WHERE id = ?
+                        """, (student_id,))
+                        student_row = cursor.fetchone()
+                        connection.close()
+
+                        if success_record:
+                            overlay_text = "VERIFIED"
+                            overlay_color = (0, 255, 0)
+                            detail = (
+                                "Student: " + str(student_row[1])
+                                + "\nStudent ID: " + str(student_row[0])
+                                + "\nCourse: " + str(student_row[2])
+                                + " | Year: " + str(student_row[3])
+                                + " | Section: " + str(student_row[4])
+                                + "\nSubject: " + str(subject)
+                                + "\nStatus: " + str(attendance_result)
+                                + " | Method: FACE"
+                            )
+                            result_label.configure(
+                                text="VERIFIED", text_color=SUCCESS
+                            )
+                            details_label.configure(
+                                text=detail, text_color=SUCCESS
+                            )
+                        else:
+                            if str(attendance_result).lower().startswith("attendance already recorded"):
+                                overlay_text = "ALREADY VERIFIED"
+                                overlay_color = (0, 165, 255)
+                                result_label.configure(
+                                    text="ALREADY VERIFIED",
+                                    text_color=WARNING
+                                )
+                            else:
+                                overlay_text = "NOT VERIFIED"
+                                overlay_color = (0, 0, 255)
+                                result_label.configure(
+                                    text="NOT VERIFIED",
+                                    text_color=ERROR
+                                )
+                            details_label.configure(
+                                text=str(attendance_result),
+                                text_color=WARNING if "already" in str(attendance_result).lower() else ERROR
+                            )
+                        overlay_until = now_seconds + 2.0
+
+            cv2.putText(
+                frame, "CONTINUOUS FACE ATTENDANCE",
+                (20, 38), cv2.FONT_HERSHEY_SIMPLEX, 0.72,
+                overlay_color, 2
+            )
+            cv2.putText(
+                frame, overlay_text,
+                (20, 72), cv2.FONT_HERSHEY_SIMPLEX, 0.82,
+                overlay_color, 2
+            )
+            cv2.putText(
+                frame,
+                "NEXT STUDENT CAN SCAN",
+                (20, 108), cv2.FONT_HERSHEY_SIMPLEX, 0.58,
+                (255, 255, 255), 2
+            )
+
+            height, width = frame.shape[:2]
+            cv2.rectangle(
+                frame,
+                (width - 180, height - 75),
+                (width - 20, height - 20),
+                (80, 80, 80), -1
+            )
+            cv2.putText(
+                frame, "CLOSE",
+                (width - 150, height - 38),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.60,
+                (255, 255, 255), 2
+            )
+            cv2.setMouseCallback(window_name, mouse, (height, width))
+            cv2.imshow(window_name, frame)
+
+            key = cv2.waitKey(1) & 0xFF
+            if cancel["value"] or key in (27, ord("q")):
+                break
+
+        camera.release()
+        cv2.destroyAllWindows()
+
+    create_button(
+        panel, "START CONTINUOUS FACE SCANNER",
+        scan_face, width=300
+    ).pack(pady=12)
+    create_button(
+        panel, "BACK",
+        lambda: teacher_attendance_page(app, teacher),
+        width=260, fg_color="#242B40", hover_color="#323B55"
+    ).pack(pady=(5, 20))
+
+
+# ============================================================
+# FINGERPRINT STATUS — NO FAKE SUCCESS
+# ============================================================
+
+def fingerprint_status_page(app, teacher):
+    clear_screen(app)
+    create_top_bar(
+        app, app, True,
+        lambda: tc_dashboard(app, teacher) if CURRENT_USER_ROLE == "tc"
+        else teacher_dashboard(app, teacher)
+    )
+    create_page_title(
+        app, "FINGERPRINT / DEVICE",
+        "The interface reports the real hardware state only."
+    )
+
+    card = ctk.CTkFrame(
+        app, fg_color=CARD, corner_radius=18,
+        border_width=1, border_color=BORDER
+    )
+    card.pack(expand=True, padx=100, pady=30, fill="x")
+
+    fingerprint = FingerprintSystem()
+    try:
+        status = fingerprint.get_device_status()
+    except Exception as error:
+        status = {"available": False, "devices": []}
+        error_text = str(error)
+    else:
+        error_text = ""
+
+    if status.get("available"):
+        state = "DEVICE CONNECTED"
+        color = SUCCESS
+        details = "\n".join(
+            "- " + str(device)
+            for device in status.get("devices", [])
+        )
+    else:
+        state = "DEVICE NOT DETECTED"
+        color = WARNING
+        details = (
+            "No supported fingerprint/biometric device was detected.\n"
+            "Registration and verification remain unavailable until hardware is connected."
+        )
+        if error_text:
+            details += "\n\n" + error_text
+
+    ctk.CTkLabel(
+        card, text=state,
+        font=("Arial", 22, "bold"), text_color=color
+    ).pack(pady=(35, 15))
+    ctk.CTkLabel(
+        card, text=details,
+        font=("Arial", 11), text_color=TEXT,
+        justify="center", wraplength=700
+    ).pack(pady=(0, 20))
+
+    create_button(
+        card, "REFRESH DEVICE STATUS",
+        lambda: fingerprint_status_page(app, teacher),
+        width=250
+    ).pack(pady=8)
+    create_button(
+        card, "BACK",
+        lambda: tc_dashboard(app, teacher) if CURRENT_USER_ROLE == "tc"
+        else teacher_dashboard(app, teacher),
+        width=250, fg_color="#242B40", hover_color="#323B55"
+    ).pack(pady=(8, 30))
+
+
+def fingerprint_register_action(student):
+    try:
+        fingerprint = FingerprintSystem()
+        status = fingerprint.get_device_status()
+        if not status.get("available"):
+            messagebox.showwarning(
+                "Fingerprint Registration",
+                "DEVICE NOT DETECTED.\n\n"
+                "No fingerprint registration was performed."
+            )
+            return
+        success, message = fingerprint.register_fingerprint(student[0])
+        if success:
+            messagebox.showinfo(
+                "Fingerprint Registration",
+                "Fingerprint registration completed."
+            )
+        else:
+            messagebox.showwarning(
+                "Fingerprint Registration",
+                "Registration was not completed.\n\n" + str(message)
+            )
+    except Exception as error:
+        messagebox.showerror(
+            "Fingerprint Registration",
+            "Unable to check the fingerprint device.\n\n" + str(error)
+        )
+
+
+def fingerprint_attendance_action(app, teacher, selected_schedule):
+    try:
+        fingerprint = FingerprintSystem()
+        status = fingerprint.get_device_status()
+        if not status.get("available"):
+            messagebox.showwarning(
+                "Fingerprint Attendance",
+                "DEVICE NOT DETECTED.\n\n"
+                "No fingerprint attendance was recorded."
+            )
+            return
+
+        success, message = fingerprint.verify_fingerprint(None)
+        if success:
+            messagebox.showinfo(
+                "Fingerprint Attendance",
+                "Fingerprint verification completed."
+            )
+        else:
+            messagebox.showwarning(
+                "Fingerprint Attendance",
+                "Verification was not completed.\n\n" + str(message)
+            )
+    except Exception as error:
+        messagebox.showerror(
+            "Fingerprint Attendance",
+            "Unable to check the fingerprint device.\n\n" + str(error)
+        )
+
+
+# ============================================================
+# REPORTS
+# ============================================================
+
+def reports_page(app, teacher):
+    clear_screen(app)
+    create_top_bar(
+        app, app, True,
+        lambda: tc_dashboard(app, teacher) if CURRENT_USER_ROLE == "tc"
+        else teacher_dashboard(app, teacher)
+    )
+    create_page_title(
+        app, "REPORTS",
+        "Export actual AttendX attendance records."
+    )
+
+    card = ctk.CTkFrame(
+        app, fg_color=CARD, corner_radius=18,
+        border_width=1, border_color=BORDER
+    )
+    card.pack(expand=True, padx=100, pady=30, fill="x")
+
+    ctk.CTkLabel(
+        card,
+        text="ATTENDANCE REPORT EXPORT",
+        font=("Arial", 20, "bold"), text_color=WHITE
+    ).pack(pady=(30, 8))
+
+    ctk.CTkLabel(
+        card,
+        text="Exports are generated directly from attendance.db.",
+        font=("Arial", 11), text_color=MUTED
+    ).pack(pady=(0, 20))
+
+    def get_rows():
+        connection = get_connection()
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                SELECT
+                    attendance.attendance_date,
+                    attendance.attendance_time,
+                    students.name,
+                    students.school_id,
+                    students.course,
+                    students.year,
+                    students.section,
+                    schedules.subject,
+                    teachers.name,
+                    COALESCE(teachers.role, 'TEACHER'),
+                    attendance.method,
+                    attendance.status
+                FROM attendance
+                INNER JOIN students ON attendance.student_id = students.id
+                INNER JOIN schedules ON attendance.schedule_id = schedules.id
+                INNER JOIN teachers ON schedules.teacher_id = teachers.id
+                ORDER BY attendance.attendance_date DESC,
+                         attendance.attendance_time DESC
+            """)
+            return cursor.fetchall()
+        finally:
+            connection.close()
+
+    headers = [
+        "Date", "Time", "Student", "Student ID",
+        "Course", "Year", "Section", "Subject",
+        "Teacher/TC", "Role", "Method", "Status"
+    ]
+
+    def export_csv():
+        import csv
+        destination = filedialog.asksaveasfilename(
+            parent=app,
+            title="Export CSV",
+            defaultextension=".csv",
+            filetypes=[("CSV", "*.csv")]
+        )
+        if not destination:
+            return
+        rows = get_rows()
+        try:
+            with open(destination, "w", newline="", encoding="utf-8-sig") as file:
+                writer = csv.writer(file)
+                writer.writerow(headers)
+                writer.writerows(rows)
+            messagebox.showinfo(
+                "CSV Export",
+                "CSV report exported successfully."
+            )
+        except Exception as error:
+            messagebox.showerror("CSV Export", str(error))
+
+    def export_xlsx():
+        destination = filedialog.asksaveasfilename(
+            parent=app,
+            title="Export Excel",
+            defaultextension=".xlsx",
+            filetypes=[("Excel Workbook", "*.xlsx")]
+        )
+        if not destination:
+            return
+        try:
+            from openpyxl import Workbook
+            workbook = Workbook()
+            sheet = workbook.active
+            sheet.title = "Attendance"
+            sheet.append(headers)
+            for row in get_rows():
+                sheet.append(list(row))
+            workbook.save(destination)
+            messagebox.showinfo(
+                "Excel Export",
+                "Excel report exported successfully."
+            )
+        except ImportError:
+            messagebox.showerror(
+                "Excel Export",
+                "openpyxl is not installed. Install it to export XLSX reports."
+            )
+        except Exception as error:
+            messagebox.showerror("Excel Export", str(error))
+
+    def export_pdf():
+        destination = filedialog.asksaveasfilename(
+            parent=app,
+            title="Export PDF",
+            defaultextension=".pdf",
+            filetypes=[("PDF", "*.pdf")]
+        )
+        if not destination:
+            return
+        try:
+            from reportlab.lib import colors as pdf_colors
+            from reportlab.lib.pagesizes import landscape, letter
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+            document = SimpleDocTemplate(
+                destination, pagesize=landscape(letter)
+            )
+            table_data = [headers] + [list(row) for row in get_rows()]
+            table = Table(table_data, repeatRows=1)
+            table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), pdf_colors.HexColor("#7C5CFC")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), pdf_colors.white),
+                ("GRID", (0, 0), (-1, -1), 0.4, pdf_colors.grey),
+                ("FONTSIZE", (0, 0), (-1, -1), 7),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE")
+            ]))
+            document.build([table])
+            messagebox.showinfo(
+                "PDF Export",
+                "PDF report exported successfully."
+            )
+        except ImportError:
+            messagebox.showerror(
+                "PDF Export",
+                "reportlab is not installed. Install it to export PDF reports."
+            )
+        except Exception as error:
+            messagebox.showerror("PDF Export", str(error))
+
+    create_button(card, "EXPORT CSV", export_csv, width=260).pack(pady=8)
+    create_button(card, "EXPORT EXCEL (.XLSX)", export_xlsx, width=260).pack(pady=8)
+    create_button(card, "EXPORT PDF / PRINT", export_pdf, width=260).pack(pady=8)
+    create_button(
+        card, "BACK",
+        lambda: tc_dashboard(app, teacher) if CURRENT_USER_ROLE == "tc"
+        else teacher_dashboard(app, teacher),
+        width=260, fg_color="#242B40", hover_color="#323B55"
+    ).pack(pady=(8, 30))
+
+
+# ============================================================
+# BACKUP / RESTORE
+# ============================================================
+
+def backup_restore_page(app, teacher):
+    clear_screen(app)
+    create_top_bar(
+        app, app, True,
+        lambda: tc_dashboard(app, teacher) if CURRENT_USER_ROLE == "tc"
+        else teacher_dashboard(app, teacher)
+    )
+    create_page_title(
+        app, "BACKUP / RESTORE",
+        "Protect the active AttendX database before restoring."
+    )
+
+    card = ctk.CTkFrame(
+        app, fg_color=CARD, corner_radius=18,
+        border_width=1, border_color=BORDER
+    )
+    card.pack(expand=True, padx=100, pady=30, fill="x")
+
+    def backup():
+        destination = filedialog.asksaveasfilename(
+            parent=app,
+            title="Backup AttendX Database",
+            initialfile="attendance_backup.db",
+            defaultextension=".db",
+            filetypes=[("SQLite Database", "*.db")]
+        )
+        if not destination:
+            return
+        try:
+            source = os.path.abspath(DB_FILE)
+            shutil.copy2(source, destination)
+            messagebox.showinfo(
+                "Backup Complete",
+                "Database backup completed successfully."
+            )
+        except Exception as error:
+            messagebox.showerror(
+                "Backup Failed",
+                "Database backup failed.\n\n" + str(error)
+            )
+
+    def restore():
+        source = filedialog.askopenfilename(
+            parent=app,
+            title="Select AttendX Database Backup",
+            filetypes=[("SQLite Database", "*.db"), ("All Files", "*.*")]
+        )
+        if not source:
+            return
+
+        answer = messagebox.askyesno(
+            "Confirm Restore",
+            "Restore this database and replace the active attendance.db?\n\n"
+            "Make sure you have a current backup first."
+        )
+        if not answer:
+            return
+
+        try:
+            # Validate that the selected file is an SQLite database
+            # before touching the active database.
+            test = sqlite3.connect(source)
+            test.execute("SELECT name FROM sqlite_master LIMIT 1")
+            test.close()
+
+            active = os.path.abspath(DB_FILE)
+            temporary = active + ".restore_tmp"
+            shutil.copy2(source, temporary)
+            os.replace(temporary, active)
+
+            messagebox.showinfo(
+                "Restore Complete",
+                "Database restored successfully.\n\n"
+                "Restart AttendX to reload all restored records."
+            )
+        except Exception as error:
+            try:
+                if os.path.exists(active + ".restore_tmp"):
+                    os.remove(active + ".restore_tmp")
+            except Exception:
+                pass
+            messagebox.showerror(
+                "Restore Failed",
+                "Database restore failed.\n\n" + str(error)
+            )
+
+    ctk.CTkLabel(
+        card, text="DATABASE SAFETY",
+        font=("Arial", 20, "bold"), text_color=WHITE
+    ).pack(pady=(35, 8))
+    ctk.CTkLabel(
+        card,
+        text="Backup copies the actual attendance.db. Restore requires confirmation.",
+        font=("Arial", 11), text_color=MUTED
+    ).pack(pady=(0, 20))
+    create_button(card, "BACKUP DATABASE", backup, width=280).pack(pady=8)
+    create_button(card, "RESTORE DATABASE", restore, width=280).pack(pady=8)
+    create_button(
+        card, "BACK",
+        lambda: tc_dashboard(app, teacher) if CURRENT_USER_ROLE == "tc"
+        else teacher_dashboard(app, teacher),
+        width=280, fg_color="#242B40", hover_color="#323B55"
+    ).pack(pady=(8, 30))
+
+
+# ============================================================
+# CONTROLLED SCHEDULE MANAGEMENT
+# ============================================================
+
+def teacher_add_schedule_page(app, teacher):
+    clear_screen(app)
+    create_top_bar(
+        app, app, True,
+        lambda: tc_dashboard(app, teacher) if CURRENT_USER_ROLE == "tc"
+        else teacher_dashboard(app, teacher)
+    )
+    create_page_title(
+        app, "ADD SCHEDULE",
+        "Create a validated class schedule."
+    )
+
+    form = ctk.CTkScrollableFrame(
+        app, width=700, height=650,
+        fg_color=CARD, corner_radius=18,
+        border_width=1, border_color=BORDER
+    )
+    form.pack(fill="both", expand=True, padx=80, pady=(0, 15))
+
+    ctk.CTkLabel(
+        form, text="CLASS SCHEDULE",
+        font=("Arial", 22, "bold"), text_color=WHITE
+    ).pack(pady=(20, 10))
+
+    ctk.CTkLabel(
+        form, text="Assigned to: " + str(teacher[2])
+        + " (" + ("TC" if CURRENT_USER_ROLE == "tc" else "TEACHER") + ")",
+        font=("Arial", 10, "bold"), text_color=PURPLE
+    ).pack(pady=(0, 12))
+
+    ctk.CTkLabel(form, text="Course", font=("Arial", 10, "bold"), text_color=MUTED).pack(anchor="w")
+    course = _make_combo(form, _get_course_values())
+    course.pack(fill="x", pady=6)
+
+    ctk.CTkLabel(form, text="Subject", font=("Arial", 10, "bold"), text_color=MUTED).pack(anchor="w")
+    subject_values = []
+    subject_lookup = {}
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT subject_code, subject_name
+        FROM subjects
+        WHERE UPPER(COALESCE(status, 'ACTIVE')) = 'ACTIVE'
+        ORDER BY subject_code
+    """)
+    for row in cursor.fetchall():
+        label = row[0] + " | " + row[1]
+        subject_values.append(label)
+        subject_lookup[label] = row
+    connection.close()
+
+    if not subject_values:
+        subject_values = ["CREATE SUBJECT FIRST"]
+        subject_lookup["CREATE SUBJECT FIRST"] = ("", "")
+
+    subject_box = _make_combo(form, subject_values)
+    subject_box.pack(fill="x", pady=6)
+
+    ctk.CTkLabel(form, text="Year", font=("Arial", 10, "bold"), text_color=MUTED).pack(anchor="w")
+    year = _make_combo(form, ["1ST", "2ND", "3RD", "4TH"], "1ST")
+    year.pack(fill="x", pady=6)
+
+    ctk.CTkLabel(form, text="Section", font=("Arial", 10, "bold"), text_color=MUTED).pack(anchor="w")
+    section = _make_combo(form, _get_section_values(course.get(), year.get()), "A")
+    section.pack(fill="x", pady=6)
+
+    def refresh_sections(_value=None):
+        values = _get_section_values(course.get(), year.get())
+        section.configure(values=values)
+        if section.get() not in values:
+            section.set(values[0])
+
+    course.configure(command=refresh_sections)
+    year.configure(command=refresh_sections)
+
+    day = _make_combo(
+        form,
+        ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "Monday"
+    )
+    day.pack(fill="x", pady=6)
+
+    _, start_hour, start_minute, start_period = create_time_selector(
+        form, "Start Time", "7", "00", "AM"
+    )
+    _, end_hour, end_minute, end_period = create_time_selector(
+        form, "End Time", "8", "00", "AM"
+    )
+
+    def save_schedule():
+        course_value = _normalize_text(course.get()).upper()
+        year_value = _normalize_text(year.get()).upper()
+        section_value = _normalize_text(section.get()).upper()
+        day_value = _normalize_text(day.get())
+        selected_subject = subject_lookup.get(subject_box.get())
+        if not selected_subject or not selected_subject[0]:
+            messagebox.showerror(
+                "Schedule Error",
+                "Select a valid centralized subject first."
+            )
+            return
+
+        subject_code = selected_subject[0]
+        subject_name = selected_subject[1]
+        start_value = to_24_hour(
+            start_hour.get(), start_minute.get(), start_period.get()
+        )
+        end_value = to_24_hour(
+            end_hour.get(), end_minute.get(), end_period.get()
+        )
+
+        start_minutes = convert_time(start_value)
+        end_minutes = convert_time(end_value)
+
+        if not course_value or not year_value or not section_value or not day_value:
+            messagebox.showerror(
+                "Schedule Error",
+                "Course, Year, Section and Day are required."
+            )
+            return
+
+        if start_minutes is None or end_minutes is None:
+            messagebox.showerror(
+                "Invalid Time",
+                "Please select valid start and end times."
+            )
+            return
+
+        if end_minutes <= start_minutes:
+            messagebox.showerror(
+                "Invalid Time",
+                "End Time must be later than Start Time."
+            )
+            return
+
+        connection = get_connection()
+        cursor = connection.cursor()
+        try:
+            # Exact duplicate prevention.
+            cursor.execute("""
+                SELECT id
+                FROM schedules
+                WHERE teacher_id = ?
+                  AND UPPER(TRIM(course)) = UPPER(TRIM(?))
+                  AND UPPER(TRIM(subject)) = UPPER(TRIM(?))
+                  AND UPPER(TRIM(section)) = UPPER(TRIM(?))
+                  AND UPPER(TRIM(year)) = UPPER(TRIM(?))
+                  AND day = ?
+                  AND start_time = ?
+                  AND end_time = ?
+            """, (
+                teacher[0], course_value, subject_name, section_value,
+                year_value, day_value, start_value, end_value
+            ))
+            if cursor.fetchone():
+                messagebox.showerror(
+                    "Duplicate Schedule",
+                    "This exact schedule already exists."
+                )
+                return
+
+            # Overlap prevention for the same Teacher/TC and day.
+            cursor.execute("""
+                SELECT start_time, end_time
+                FROM schedules
+                WHERE teacher_id = ? AND day = ?
+            """, (teacher[0], day_value))
+            for old_start, old_end in cursor.fetchall():
+                old_start_minutes = convert_time(old_start)
+                old_end_minutes = convert_time(old_end)
+                if (
+                    old_start_minutes is not None
+                    and old_end_minutes is not None
+                    and start_minutes < old_end_minutes
+                    and end_minutes > old_start_minutes
+                ):
+                    messagebox.showerror(
+                        "Schedule Conflict",
+                        "This schedule overlaps another schedule for the same Teacher/TC and day."
+                    )
+                    return
+
+            cursor.execute("""
+                INSERT INTO schedules
+                (
+                    teacher_id, course, subject, section, year,
+                    day, start_time, end_time, subject_code
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                teacher[0], course_value, subject_name, section_value,
+                year_value, day_value, start_value, end_value, subject_code
+            ))
+            connection.commit()
+        except sqlite3.IntegrityError as error:
+            connection.rollback()
+            messagebox.showerror("Schedule Error", str(error))
+            return
+        except Exception as error:
+            connection.rollback()
+            messagebox.showerror("Schedule Error", str(error))
+            return
+        finally:
+            connection.close()
+
+        messagebox.showinfo("Schedule Added", "Class schedule successfully added.")
+        tc_dashboard(app, teacher) if CURRENT_USER_ROLE == "tc" else teacher_dashboard(app, teacher)
+
+    create_button(form, "SAVE SCHEDULE", save_schedule, width=300).pack(pady=(18, 8))
+    create_button(
+        form, "CANCEL",
+        lambda: tc_dashboard(app, teacher) if CURRENT_USER_ROLE == "tc"
+        else teacher_dashboard(app, teacher),
+        width=300, fg_color="#242B40", hover_color="#323B55"
+    ).pack(pady=(0, 20))
+
+
+# ============================================================
+# SAFE TEACHER DASHBOARD NAVIGATION PATCH
+# ============================================================
+
 
 if __name__ == "__main__":
     run_intro()

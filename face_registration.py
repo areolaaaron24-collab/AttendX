@@ -2366,3 +2366,289 @@ if __name__ == "__main__":
         print(
             "Registration was not completed."
         )
+
+# ============================================================
+# ATTENDX GUIDED AUTOMATIC FACE REGISTRATION
+# ============================================================
+
+def register_student_face(student_id):
+    """
+    Guided automatic registration:
+
+    camera -> face detection -> position -> size -> quality ->
+    stable hold -> 3/2/1 countdown -> automatic capture ->
+    validation -> encoding -> duplicate check -> save.
+    """
+    import cv2
+    import time
+    import face_recognition
+    import numpy as np
+
+    from face_system import save_face_template
+
+    connection = get_connection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute("""
+            SELECT id, school_id, name, course, year, section
+            FROM students
+            WHERE id = ?
+        """, (student_id,))
+        student = cursor.fetchone()
+    finally:
+        connection.close()
+
+    if not student:
+        print("Student not found.")
+        return False
+
+    camera = cv2.VideoCapture(0)
+    if not camera.isOpened():
+        print("Camera: NOT AVAILABLE")
+        return False
+
+    window_name = "AttendX | Guided Face Registration"
+    cv2.namedWindow(window_name)
+
+    stable_frames = 0
+    required_stable_frames = 18
+    countdown_started = None
+    countdown_value = None
+    captured = False
+    result_message = "POSITION YOUR FACE INSIDE THE GUIDE"
+    result_color = (255, 200, 0)
+
+    try:
+        while True:
+            ok, frame = camera.read()
+            if not ok or frame is None:
+                result_message = "CAMERA READ ERROR"
+                result_color = (0, 0, 255)
+                break
+
+            frame = cv2.flip(frame, 1)
+            height, width = frame.shape[:2]
+            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            locations = face_recognition.face_locations(
+                rgb, model="hog"
+            )
+
+            ready = False
+
+            if len(locations) == 0:
+                stable_frames = 0
+                countdown_started = None
+                countdown_value = None
+                result_message = "LOOK AT THE CAMERA"
+                result_color = (0, 165, 255)
+
+            elif len(locations) > 1:
+                stable_frames = 0
+                countdown_started = None
+                countdown_value = None
+                result_message = "ONLY ONE FACE ALLOWED"
+                result_color = (0, 0, 255)
+
+            else:
+                top, right, bottom, left = locations[0]
+                face_width = right - left
+                face_height = bottom - top
+                center_x = (left + right) // 2
+                center_y = (top + bottom) // 2
+
+                guide_left = int(width * 0.28)
+                guide_right = int(width * 0.72)
+                guide_top = int(height * 0.18)
+                guide_bottom = int(height * 0.82)
+
+                inside = (
+                    guide_left <= center_x <= guide_right
+                    and guide_top <= center_y <= guide_bottom
+                )
+
+                size_ok = (
+                    face_width >= 100
+                    and face_height >= 100
+                    and face_width <= int(width * 0.75)
+                    and face_height <= int(height * 0.75)
+                )
+
+                face_crop = frame[
+                    max(0, top):min(height, bottom),
+                    max(0, left):min(width, right)
+                ]
+
+                quality_ok = False
+                if face_crop.size > 0:
+                    gray = cv2.cvtColor(face_crop, cv2.COLOR_BGR2GRAY)
+                    quality_score = float(cv2.Laplacian(
+                        gray, cv2.CV_64F
+                    ).var())
+                    quality_ok = quality_score >= 35.0
+                else:
+                    quality_score = 0.0
+
+                cv2.rectangle(
+                    frame,
+                    (left, top),
+                    (right, bottom),
+                    (0, 255, 0) if inside and size_ok and quality_ok
+                    else (0, 0, 255),
+                    2
+                )
+
+                if not inside:
+                    stable_frames = 0
+                    countdown_started = None
+                    countdown_value = None
+                    result_message = "MOVE YOUR FACE TO THE CENTER"
+                    result_color = (0, 165, 255)
+
+                elif not size_ok:
+                    stable_frames = 0
+                    countdown_started = None
+                    countdown_value = None
+                    result_message = "MOVE CLOSER / FARTHER"
+                    result_color = (0, 165, 255)
+
+                elif not quality_ok:
+                    stable_frames = 0
+                    countdown_started = None
+                    countdown_value = None
+                    result_message = "IMPROVE LIGHTING / HOLD STILL"
+                    result_color = (0, 165, 255)
+
+                else:
+                    stable_frames += 1
+                    ready = stable_frames >= required_stable_frames
+                    result_message = "HOLD STILL — FACE READY"
+                    result_color = (0, 255, 0)
+
+                    if ready and countdown_started is None:
+                        countdown_started = time.time()
+
+                    if countdown_started is not None:
+                        elapsed = time.time() - countdown_started
+                        countdown_value = 3 - int(elapsed)
+
+                        if countdown_value > 0:
+                            result_message = (
+                                "CAPTURING IN "
+                                + str(countdown_value)
+                            )
+                            result_color = (0, 255, 0)
+                        else:
+                            encodings = face_recognition.face_encodings(
+                                rgb, [locations[0]]
+                            )
+
+                            if len(encodings) != 1:
+                                result_message = "NOT VERIFIED — ENCODING FAILED"
+                                result_color = (0, 0, 255)
+                                countdown_started = None
+                                stable_frames = 0
+                                continue
+
+                            encoding = np.asarray(
+                                encodings[0],
+                                dtype=np.float64
+                            )
+
+                            if encoding.shape != (128,):
+                                result_message = "NOT VERIFIED — INVALID ENCODING"
+                                result_color = (0, 0, 255)
+                                countdown_started = None
+                                stable_frames = 0
+                                continue
+
+                            duplicate = check_duplicate_face(
+                                student_id,
+                                encoding
+                            )
+
+                            if duplicate.get("duplicate"):
+                                result_message = (
+                                    "FACE ALREADY REGISTERED TO ANOTHER STUDENT"
+                                )
+                                result_color = (0, 0, 255)
+                                print(duplicate.get("message", result_message))
+                                break
+
+                            saved = save_face_template(
+                                student_id,
+                                encoding
+                            )
+
+                            if saved.get("success"):
+                                captured = True
+                                result_message = "FACE REGISTRATION COMPLETE"
+                                result_color = (0, 255, 0)
+                            else:
+                                result_message = (
+                                    "FACE SAVE FAILED: "
+                                    + str(saved.get("message", "Unknown error"))
+                                )
+                                result_color = (0, 0, 255)
+
+                            break
+
+            cv2.rectangle(
+                frame,
+                (int(width * 0.28), int(height * 0.18)),
+                (int(width * 0.72), int(height * 0.82)),
+                result_color,
+                2
+            )
+
+            cv2.putText(
+                frame,
+                "ATTENDX GUIDED FACE REGISTRATION",
+                (20, 34),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.72,
+                (255, 255, 255),
+                2
+            )
+
+            cv2.putText(
+                frame,
+                result_message,
+                (20, 68),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.62,
+                result_color,
+                2
+            )
+
+            cv2.putText(
+                frame,
+                "Student: " + str(student[2]),
+                (20, 100),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.55,
+                (255, 255, 255),
+                2
+            )
+
+            cv2.putText(
+                frame,
+                "ESC / Q = CANCEL",
+                (20, height - 22),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.52,
+                (220, 220, 220),
+                1
+            )
+
+            cv2.imshow(window_name, frame)
+
+            key = cv2.waitKey(1) & 0xFF
+            if key in (27, ord("q")):
+                break
+
+    finally:
+        camera.release()
+        cv2.destroyAllWindows()
+
+    return captured
